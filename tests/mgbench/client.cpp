@@ -45,23 +45,23 @@ DEFINE_string(input, "", "Input file. By default stdin is used.");
 DEFINE_string(output, "", "Output file. By default stdout is used.");
 
 std::pair<std::map<std::string, communication::bolt::Value>, uint64_t> ExecuteNTimesTillSuccess(
-    communication::bolt::Client *client, const std::string &query,
-    const std::map<std::string, communication::bolt::Value> &params, int max_attempts,
-    std::vector<std::vector<communication::bolt::Value>> *results) {
-  for (uint64_t i = 0; i < max_attempts; ++i) {
-    try {
-      auto ret = client->Execute(query, params);
-      *results = std::move(ret);
-      return {std::move(ret.metadata), i};
-    } catch (const utils::BasicException &e) {
-      if (i == max_attempts - 1) {
-        LOG_FATAL("Could not execute query '{}' {} times! Error message: {}", query, max_attempts, e.what());
-      } else {
-        continue;
-      }
+  communication::bolt::Client *client, const std::string &query,
+  const std::map<std::string, communication::bolt::Value> &params, int max_attempts,
+  std::vector<std::vector<communication::bolt::Value>> *results) {
+for (uint64_t i = 0; i < max_attempts; ++i) {
+  try {
+    auto ret = client->Execute(query, params);
+    *results = std::move(ret.rows);
+    return {std::move(ret.metadata), i};
+  } catch (const utils::BasicException &e) {
+    if (i == max_attempts - 1) {
+      LOG_FATAL("Could not execute query '{}' {} times! Error message: {}", query, max_attempts, e.what());
+    } else {
+      continue;
     }
   }
-  LOG_FATAL("Could not execute query '{}' {} times!", query, max_attempts);
+}
+LOG_FATAL("Could not execute query '{}' {} times!", query, max_attempts);
 }
 
 communication::bolt::Value JsonToBoltValue(const nlohmann::json &data) {
@@ -100,7 +100,7 @@ communication::bolt::Value JsonToBoltValue(const nlohmann::json &data) {
 }
 
 nlohmann::json BoltValueToJson(const communication::bolt::Value &value) {
-  if (value.type == communication::bolt::Value::Type::Null) return nullptr;
+  if (value.type() == communication::bolt::Value::Type::Null) return nullptr;
   if (value.IsBool()) return value.ValueBool();
   if (value.IsInt()) return value.ValueInt();
   if (value.IsDouble()) return value.ValueDouble();
@@ -121,7 +121,6 @@ nlohmann::json BoltValueToJson(const communication::bolt::Value &value) {
   }
   LOG_FATAL("Unsupported Bolt value type!");
 }
-
 void Execute(const std::vector<std::pair<std::string, std::map<std::string, communication::bolt::Value>>> &queries,
              std::ostream *stream) {
   for (const auto &query : queries) {
