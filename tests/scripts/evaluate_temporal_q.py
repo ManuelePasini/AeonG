@@ -9,7 +9,7 @@ def get_binary(args):
     if args.binary_type == "aeong":
         aeong = runners.Memgraph(args.aeong_binary, args.data_directory, not args.no_properties_on_edges,
                                  memgraph_port=7687,
-                                 snapshot_interval_sec=30, memory_limit=0, anchor_num=10, real_time_flag=False)
+                                 snapshot_interval_sec=30, memory_limit=0, anchor_num=10, real_time_flag=True)
         aeong.start_benchmark()
         return aeong
     if args.binary_type == "tgql":

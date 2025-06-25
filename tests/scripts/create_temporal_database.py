@@ -158,6 +158,8 @@ if __name__ == "__main__":
     client = runners.Client(args.client_binary, args.data_directory, memgraph_port=7687)
     # create index
     client.execute(file_path=args.index_cypher_path, num_workers=args.num_workers)
+    start_time = 0
+    end_time = 0
     # create original database
     if args.load_tgql_flag == 1:
         if args.benchmark_type == "ldbc":
@@ -180,20 +182,31 @@ if __name__ == "__main__":
             ret1_test = client.execute(file_path=f'{args.original_dataset_cypher_path}/tgql_node.txt', num_workers=args.num_workers)
             #create edges
             ret1_test = client.execute(file_path=f'{args.original_dataset_cypher_path}/tgql_edge.txt', num_workers=args.num_workers)
-        else:
-            client.execute(file_path=args.original_dataset_cypher_path, num_workers=args.num_workers)
+        #else:
+            # start_time = int(time.time() * 1000000)
+            # client.execute(file_path=args.original_dataset_cypher_path, num_workers=args.num_workers)
+            # end_time = int(time.time() * 1000000)
+            # print("Create original database time:", (end_time - start_time) / 1000000, "s")
     else:
         if args.benchmark_type != "gmark":
             client.execute(file_path=args.original_dataset_cypher_path, num_workers=args.num_workers)
-    # process graph operations to generate historical data
+
     start_time = int(time.time() * 1000000)
-    graph_op_ret = client.execute(file_path=args.graph_operation_cypher_path, num_workers=args.num_workers)
+    graph_op_ret = client.execute(file_path=args.original_dataset_cypher_path, num_workers=args.num_workers)
     end_time = int(time.time() * 1000000)
+    
+    print("Create original database time:", (end_time - start_time) / 1000000, "s")
+    # process graph operations to generate historical data
+    #start_time = int(time.time() * 1000000)
+    #graph_op_ret = client.execute(file_path=args.graph_operation_cypher_path, num_workers=args.num_workers)
+    #end_time = int(time.time() * 1000000)
+
     if args.binary_type == "clockg":
         # need time to store historical data
         time.sleep(5 * 60)
     if args.binary_type == "aeong":
         time.sleep(60)
+
     aeong.stop()
     print(graph_op_ret[0]['duration'] / graph_op_ret[0]['count'],
         get_space(args.data_directory, args.binary_type) / 1024 / 1024, start_time, end_time)
