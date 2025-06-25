@@ -51,7 +51,7 @@ std::pair<std::map<std::string, communication::bolt::Value>, uint64_t> ExecuteNT
   for (uint64_t i = 0; i < max_attempts; ++i) {
     try {
       auto ret = client->Execute(query, params);
-      *results = std::move(ret.rows);
+      *results = std::move(ret);
       return {std::move(ret.metadata), i};
     } catch (const utils::BasicException &e) {
       if (i == max_attempts - 1) {
@@ -100,7 +100,7 @@ communication::bolt::Value JsonToBoltValue(const nlohmann::json &data) {
 }
 
 nlohmann::json BoltValueToJson(const communication::bolt::Value &value) {
-  if (value.IsNull()) return nullptr;
+  if (value.type == communication::bolt::Value::Type::Null) return nullptr;
   if (value.IsBool()) return value.ValueBool();
   if (value.IsInt()) return value.ValueInt();
   if (value.IsDouble()) return value.ValueDouble();
