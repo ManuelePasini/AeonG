@@ -51,7 +51,7 @@ std::pair<std::map<std::string, communication::bolt::Value>, uint64_t> ExecuteNT
 for (uint64_t i = 0; i < max_attempts; ++i) {
   try {
     auto ret = client->Execute(query, params);
-    *results = std::move(ret.rows);
+    *results = std::move(ret.records);  // ✅ CAMBIO QUI
     return {std::move(ret.metadata), i};
   } catch (const utils::BasicException &e) {
     if (i == max_attempts - 1) {
