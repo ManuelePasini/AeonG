@@ -80,7 +80,7 @@ communication::bolt::Value JsonToBoltValue(const nlohmann::json &data) {
 }
 
 nlohmann::json BoltValueToJson(const communication::bolt::Value &value) {
-  if (value.IsNull()) return nullptr;
+  if (value.type == communication::bolt::Value::Type::Null) return nullptr;
   if (value.IsBool()) return value.ValueBool();
   if (value.IsInt()) return value.ValueInt();
   if (value.IsDouble()) return value.ValueDouble();
@@ -97,6 +97,62 @@ nlohmann::json BoltValueToJson(const communication::bolt::Value &value) {
   }
   LOG_FATAL("Unsupported Bolt value type for JSON conversion!");
 }
+
+class Metadata final {
+  private:
+   struct Record {
+     uint64_t count{0};
+     double average{0.0};
+     double minimum{std::numeric_limits<double>::infinity()};
+     double maximum{-std::numeric_limits<double>::infinity()};
+   };
+ 
+  public:
+   void Append(const std::map<std::string, communication::bolt::Value> &values) {
+     for (const auto &item : values) {
+       if (!item.second.IsInt() && !item.second.IsDouble()) continue;
+       auto [it, emplaced] = storage_.emplace(item.first, Record());
+       auto &record = it->second;
+       double value = 0.0;
+       if (item.second.IsInt()) {
+         value = item.second.ValueInt();
+       } else {
+         value = item.second.ValueDouble();
+       }
+       ++record.count;
+       record.average += value;
+       record.minimum = std::min(record.minimum, value);
+       record.maximum = std::max(record.maximum, value);
+     }
+   }
+ 
+   nlohmann::json Export() {
+     nlohmann::json data = nlohmann::json::object();
+     for (const auto &item : storage_) {
+       nlohmann::json row = nlohmann::json::object();
+       row["average"] = item.second.average / item.second.count;
+       row["minimum"] = item.second.minimum;
+       row["maximum"] = item.second.maximum;
+       data[item.first] = row;
+     }
+     return data;
+   }
+ 
+   Metadata &operator+=(const Metadata &other) {
+     for (const auto &item : other.storage_) {
+       auto [it, emplaced] = storage_.emplace(item.first, Record());
+       auto &record = it->second;
+       record.count += item.second.count;
+       record.average += item.second.average;
+       record.minimum = std::min(record.minimum, item.second.minimum);
+       record.maximum = std::max(record.maximum, item.second.maximum);
+     }
+     return *this;
+   }
+ 
+  private:
+   std::map<std::string, Record> storage_;
+ };
 
 struct QueryResult {
   std::string query;
@@ -250,7 +306,7 @@ int main(int argc, char **argv) {
     std::string line;
     while (std::getline(*in, line)) {
       auto data = nlohmann::json::parse(line);
-      MgAssert(data.is_array() && data.size() == 2);
+      MG_ASSERT(data.is_array() && data.size() == 2);
       queries.emplace_back(data[0].get<std::string>(), JsonToBoltValue(data[1]).ValueMap());
     }
   }
