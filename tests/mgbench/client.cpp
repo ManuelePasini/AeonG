@@ -1,5 +1,13 @@
 // Copyright 2021 Memgraph Ltd.
-// Licensed under the Business Source License.
+//
+// Use of this software is governed by the Business Source License
+// included in the file licenses/BSL.txt; by using this file, you agree to be bound by the terms of the Business Source
+// License, and you may not use this file except in compliance with the Business Source License.
+//
+// As of the Change Date specified in that file, in accordance with
+// the Business Source License, use of this software will be governed
+// by the Apache License, Version 2.0, included in the file
+// licenses/APL.txt.
 
 #include <algorithm>
 #include <atomic>
@@ -30,27 +38,21 @@ DEFINE_bool(use_ssl, false, "Set to true to connect with SSL to the server.");
 
 DEFINE_uint64(num_workers, 1, "Number of workers that should be used to concurrently execute the supplied queries.");
 DEFINE_uint64(max_retries, 50, "Maximum number of retries for each query.");
-DEFINE_bool(queries_json, false, "Set to true to load all queries as a single JSON encoded list.");
+DEFINE_bool(queries_json, false, "Set to true to load all queries as as single JSON encoded list. Each item "
+                                 "in the list should contain another list whose first element is the query "
+                                 "that should be executed and the second element should be a dictionary of "
+                                 "query parameters for that query.");
 
 DEFINE_string(input, "", "Input file. By default stdin is used.");
 DEFINE_string(output, "", "Output file. By default stdout is used.");
 
-using QueryResult = std::vector<std::map<std::string, communication::bolt::Value>>;
-
-struct QueryExecutionResult {
-  std::map<std::string, communication::bolt::Value> metadata;
-  QueryResult records;
-  uint64_t retries;
-};
-
-QueryExecutionResult ExecuteNTimesTillSuccess(
+std::pair<std::map<std::string, communication::bolt::Value>, uint64_t> ExecuteNTimesTillSuccess(
     communication::bolt::Client *client, const std::string &query,
     const std::map<std::string, communication::bolt::Value> &params, int max_attempts) {
-
   for (uint64_t i = 0; i < max_attempts; ++i) {
     try {
       auto ret = client->Execute(query, params);
-      return {std::move(ret.metadata), std::move(ret.records), i};
+      return {std::move(ret.metadata), i};
     } catch (const utils::BasicException &e) {
       if (i == max_attempts - 1) {
         LOG_FATAL("Could not execute query '{}' {} times! Error message: {}", query, max_attempts, e.what());
@@ -97,44 +99,84 @@ communication::bolt::Value JsonToBoltValue(const nlohmann::json &data) {
   }
 }
 
-nlohmann::json BoltValueToJson(const communication::bolt::Value &value) {
-  if (value.IsNull()) return nullptr;
-  if (value.IsBool()) return value.ValueBool();
-  if (value.IsInt()) return value.ValueInt();
-  if (value.IsDouble()) return value.ValueDouble();
-  if (value.IsString()) return value.ValueString();
-  if (value.IsList()) {
-    nlohmann::json arr = nlohmann::json::array();
-    for (const auto &item : value.ValueList()) {
-      arr.push_back(BoltValueToJson(item));
+class Metadata final {
+ private:
+  struct Record {
+    uint64_t count{0};
+    double average{0.0};
+    double minimum{std::numeric_limits<double>::infinity()};
+    double maximum{-std::numeric_limits<double>::infinity()};
+  };
+
+ public:
+  void Append(const std::map<std::string, communication::bolt::Value> &values) {
+    for (const auto &item : values) {
+      if (!item.second.IsInt() && !item.second.IsDouble()) continue;
+      auto [it, emplaced] = storage_.emplace(item.first, Record());
+      auto &record = it->second;
+      double value = 0.0;
+      if (item.second.IsInt()) {
+        value = item.second.ValueInt();
+      } else {
+        value = item.second.ValueDouble();
+      }
+      ++record.count;
+      record.average += value;
+      record.minimum = std::min(record.minimum, value);
+      record.maximum = std::max(record.maximum, value);
     }
-    return arr;
   }
-  if (value.IsMap()) {
-    nlohmann::json obj = nlohmann::json::object();
-    for (const auto &item : value.ValueMap()) {
-      obj[item.first] = BoltValueToJson(item.second);
+
+  nlohmann::json Export() {
+    nlohmann::json data = nlohmann::json::object();
+    for (const auto &item : storage_) {
+      nlohmann::json row = nlohmann::json::object();
+      row["average"] = item.second.average / item.second.count;
+      row["minimum"] = item.second.minimum;
+      row["maximum"] = item.second.maximum;
+      data[item.first] = row;
     }
-    return obj;
+    return data;
   }
-  LOG_FATAL("Unsupported Bolt value type for JSON conversion!");
-}
+
+  Metadata &operator+=(const Metadata &other) {
+    for (const auto &item : other.storage_) {
+      auto [it, emplaced] = storage_.emplace(item.first, Record());
+      auto &record = it->second;
+      record.count += item.second.count;
+      record.average += item.second.average;
+      record.minimum = std::min(record.minimum, item.second.minimum);
+      record.maximum = std::max(record.maximum, item.second.maximum);
+    }
+    return *this;
+  }
+
+ private:
+  std::map<std::string, Record> storage_;
+};
+
+struct QueryResult {
+  std::string query;
+  std::map<std::string, communication::bolt::Value> parameters;
+  std::vector<std::map<std::string, communication::bolt::Value>> results;
+  uint64_t retries;
+};
 
 void Execute(const std::vector<std::pair<std::string, std::map<std::string, communication::bolt::Value>>> &queries,
              std::ostream *stream) {
-
   std::vector<std::thread> threads;
   threads.reserve(FLAGS_num_workers);
 
-  std::vector<uint64_t> worker_retries(FLAGS_num_workers, 0);
   std::vector<std::vector<QueryResult>> worker_results(FLAGS_num_workers);
 
+  std::vector<uint64_t> worker_retries(FLAGS_num_workers, 0);
+  std::vector<Metadata> worker_metadata(FLAGS_num_workers, Metadata());
+  std::vector<double> worker_duration(FLAGS_num_workers, 0.0);
+
+  auto size = queries.size();
   std::atomic<bool> run(false);
   std::atomic<uint64_t> ready(0);
   std::atomic<uint64_t> position(0);
-
-  auto size = queries.size();
-
   for (int worker = 0; worker < FLAGS_num_workers; ++worker) {
     threads.push_back(std::thread([&, worker]() {
       io::network::Endpoint endpoint(FLAGS_address, FLAGS_port);
@@ -143,109 +185,102 @@ void Execute(const std::vector<std::pair<std::string, std::map<std::string, comm
       client.Connect(endpoint, FLAGS_username, FLAGS_password);
 
       ready.fetch_add(1, std::memory_order_acq_rel);
-      while (!run.load(std::memory_order_acq_rel)) {}
+      while (!run.load(std::memory_order_acq_rel))
+        ;
 
       auto &retries = worker_retries[worker];
+      auto &metadata = worker_metadata[worker];
+      auto &duration = worker_duration[worker];
       auto &results = worker_results[worker];
+      utils::Timer timer;
 
       while (true) {
         auto pos = position.fetch_add(1, std::memory_order_acq_rel);
         if (pos >= size) break;
-
         const auto &query = queries[pos];
-        auto ret = ExecuteNTimesTillSuccess(&client, query.first, query.second, FLAGS_max_retries);
 
-        retries += ret.retries;
-        results.push_back(ret.records);
+        auto start = utils::Timer();
+        auto ret = client.Execute(query.first, query.second);
+        double elapsed = start.Elapsed().count();
+
+        retries += 0; // qui puoi incrementare se vuoi tracciare eventuali retry per query specifica
+        metadata.Append(ret.metadata);
+
+        QueryResult qresult;
+        qresult.query = query.first;
+        qresult.parameters = query.second;
+        qresult.retries = 0; // qui puoi aggiornare se implementi le retry per ogni query
+
+        for (const auto &row : ret.rows) {
+          qresult.results.push_back(row);
+        }
+
+        results.push_back(std::move(qresult));
       }
+
+      duration = timer.Elapsed().count();
       client.Close();
     }));
   }
 
-  while (ready.load(std::memory_order_acq_rel) < FLAGS_num_workers) {}
+  while (ready.load(std::memory_order_acq_rel) < FLAGS_num_workers)
+    ;
   run.store(true, std::memory_order_acq_rel);
-
-  for (auto &thread : threads) thread.join();
-
-  uint64_t final_retries = 0;
-  nlohmann::json results_json = nlohmann::json::array();
-
   for (int i = 0; i < FLAGS_num_workers; ++i) {
-    final_retries += worker_retries[i];
-    for (const auto &query_result : worker_results[i]) {
-      for (const auto &record : query_result) {
-        nlohmann::json record_json = nlohmann::json::object();
-        for (const auto &field : record) {
-          record_json[field.first] = BoltValueToJson(field.second);
-        }
-        results_json.push_back(record_json);
-      }
-    }
+    threads[i].join();
   }
+
+  Metadata final_metadata;
+  uint64_t final_retries = 0;
+  double final_duration = 0.0;
+
+  std::vector<QueryResult> all_results;
+  for (int i = 0; i < FLAGS_num_workers; ++i) {
+    final_metadata += worker_metadata[i];
+    final_retries += worker_retries[i];
+    final_duration += worker_duration[i];
+    all_results.insert(all_results.end(),
+                       std::make_move_iterator(worker_results[i].begin()),
+                       std::make_move_iterator(worker_results[i].end()));
+  }
+  final_duration /= FLAGS_num_workers;
 
   nlohmann::json summary = nlohmann::json::object();
   summary["count"] = queries.size();
+  summary["duration"] = final_duration;
+  summary["throughput"] = static_cast<double>(queries.size()) / final_duration;
   summary["retries"] = final_retries;
-  summary["results"] = results_json;
+  summary["metadata"] = final_metadata.Export();
   summary["num_workers"] = FLAGS_num_workers;
 
-  (*stream) << summary.dump() << std::endl;
-}
+  nlohmann::json results_json = nlohmann::json::array();
+  for (const auto &result : all_results) {
+    nlohmann::json item;
+    item["query"] = result.query;
 
-int main(int argc, char **argv) {
-  gflags::ParseCommandLineFlags(&argc, &argv, true);
+    nlohmann::json params_json = nlohmann::json::object();
+    for (const auto &p : result.parameters) {
+      params_json[p.first] = p.second.ToJson();
+    }
+    item["parameters"] = params_json;
 
-  communication::SSLInit sslInit;
-
-  std::ifstream ifile;
-  std::istream *istream{&std::cin};
-  if (FLAGS_input != "") {
-    MG_ASSERT(std::filesystem::is_regular_file(FLAGS_input), "Input file isn't a regular file or it doesn't exist!");
-    ifile.open(FLAGS_input);
-    MG_ASSERT(ifile, "Couldn't open input file!");
-    istream = &ifile;
-  }
-
-  std::ofstream ofile;
-  std::ostream *ostream{&std::cout};
-  if (FLAGS_output != "") {
-    ofile.open(FLAGS_output);
-    MG_ASSERT(ofile, "Couldn't open output file!");
-    ostream = &ofile;
-  }
-
-  std::vector<std::pair<std::string, std::map<std::string, communication::bolt::Value>>> queries;
-
-  if (!FLAGS_queries_json) {
-    std::string query;
-    while (std::getline(*istream, query)) {
-      auto trimmed = utils::Trim(query);
-      if (trimmed == "" || trimmed == ";") {
-        Execute(queries, ostream);
-        queries.clear();
-        continue;
+    nlohmann::json tuples = nlohmann::json::array();
+    for (const auto &row : result.results) {
+      nlohmann::json row_json = nlohmann::json::object();
+      for (const auto &cell : row) {
+        row_json[cell.first] = cell.second.ToJson();
       }
-      queries.emplace_back(query, std::map<std::string, communication::bolt::Value>{});
+      tuples.push_back(row_json);
     }
-  } else {
-    std::string row;
-    while (std::getline(*istream, row)) {
-      auto data = nlohmann::json::parse(row);
-      MG_ASSERT(data.is_array() && data.size() > 0, "The root item of the loaded JSON queries must be a non-empty array!");
-      MG_ASSERT(data.size() == 2, "Each item of the loaded JSON queries must be an array of length 2!");
+    item["results"] = tuples;
+    item["retries"] = result.retries;
 
-      const auto &query = data[0];
-      const auto &param = data[1];
-      MG_ASSERT(query.is_string() && param.is_object(), "The query must be a string and the parameters must be a dictionary!");
-
-      auto bolt_param = JsonToBoltValue(param);
-      MG_ASSERT(bolt_param.IsMap(), "The Bolt parameters must be a map!");
-
-      queries.emplace_back(query, std::move(bolt_param.ValueMap()));
-    }
+    results_json.push_back(item);
   }
 
-  Execute(queries, ostream);
+  nlohmann::json output = nlohmann::json::object();
+  output["summary"] = summary;
+  output["queries"] = results_json;
 
-  return 0;
+  (*stream) << output.dump(2) << std::endl;
 }
