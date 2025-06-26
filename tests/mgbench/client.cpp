@@ -120,6 +120,16 @@ void Execute(
     std::ostream *stream) {
   // parallel workers
   std::vector<std::thread> threads;
+  // Metadata class defined above
+  // Prepare worker data structures
+  std::vector<uint64_t> worker_retries(FLAGS_num_workers);
+  std::vector<Metadata> worker_meta(FLAGS_num_workers);
+  std::vector<double> worker_dur(FLAGS_num_workers);
+  std::vector<std::vector<std::vector<communication::bolt::Value>>> worker_rows(FLAGS_num_workers);
+
+  // Use atomic counters for synchronization and position
+  std::atomic<uint64_t> run_flag(0), ready(0), pos(0);
+  auto size = queries.size();
   threads.reserve(FLAGS_num_workers);
 
   std::vector<uint64_t> worker_retries(FLAGS_num_workers);
