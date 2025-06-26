@@ -201,8 +201,11 @@ void Execute(const std::vector<std::pair<std::string, std::map<std::string, comm
 
         // Extract column names from metadata
         std::vector<std::string> cols;
-        const auto &fields = ret.metadata.at("fields").ValueList();
-        for (const auto &f : fields) cols.push_back(f.ValueString());
+        auto fields_it = ret.metadata.find("fields");
+        if (fields_it != ret.metadata.end()) {
+          const auto &fields = fields_it->second.ValueList();
+          for (const auto &f : fields) cols.push_back(f.ValueString());
+        }
 
         // Build QueryResult
         QueryResult qr;
