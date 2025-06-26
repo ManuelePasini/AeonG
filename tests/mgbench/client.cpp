@@ -80,7 +80,7 @@ communication::bolt::Value JsonToBoltValue(const nlohmann::json &data) {
 }
 
 nlohmann::json BoltValueToJson(const communication::bolt::Value &value) {
-  if (value.type == communication::bolt::Value::Type::Null) return nullptr;
+  if (value.type == communication::bolt::Value::Type::Null) return nlohmann::json(nullptr);
   if (value.IsBool()) return value.ValueBool();
   if (value.IsInt()) return value.ValueInt();
   if (value.IsDouble()) return value.ValueDouble();
