@@ -211,7 +211,7 @@ void Execute(const std::vector<std::pair<std::string, std::map<std::string, comm
         qresult.parameters = query.second;
         qresult.retries = 0; // qui puoi aggiornare se implementi le retry per ogni query
 
-        for (const auto &row : ret.rows) {
+        for (const auto &row : ret.records) {
           qresult.results.push_back(row);
         }
 
@@ -260,7 +260,7 @@ void Execute(const std::vector<std::pair<std::string, std::map<std::string, comm
 
     nlohmann::json params_json = nlohmann::json::object();
     for (const auto &p : result.parameters) {
-      params_json[p.first] = p.second.ToJson();
+      params_json[p.first] = ToJson(p.second);
     }
     item["parameters"] = params_json;
 
@@ -268,7 +268,7 @@ void Execute(const std::vector<std::pair<std::string, std::map<std::string, comm
     for (const auto &row : result.results) {
       nlohmann::json row_json = nlohmann::json::object();
       for (const auto &cell : row) {
-        row_json[cell.first] = cell.second.ToJson();
+        row_json[cell.first] = ToJson(cell.second);
       }
       tuples.push_back(row_json);
     }
