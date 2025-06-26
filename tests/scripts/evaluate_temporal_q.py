@@ -9,7 +9,7 @@ def get_binary(args):
     if args.binary_type == "aeong":
         aeong = runners.Memgraph(args.aeong_binary, args.data_directory, not args.no_properties_on_edges,
                                  memgraph_port=7687,
-                                 snapshot_interval_sec=30, memory_limit=0, anchor_num=10, real_time_flag=True)
+                                 snapshot_interval_sec=30, memory_limit=0, anchor_num=10, real_time_flag=False)
         aeong.start_benchmark()
         return aeong
     if args.binary_type == "tgql":
@@ -59,19 +59,22 @@ if __name__ == "__main__":
     parser.add_argument("--binary-type",
                         default="aeong",
                         help="aeong, tgql, clockg")
+    parser.add_argument("--output",
+                        default="result.json",
+                        help="Filename to store query results")
 
     args = parser.parse_args()
     parsed_args = vars(args)
-    # print("=========check your configuration========")
-    # for key, value in parsed_args.items():
-    #     print(f"  {key}: {value}")
-    #
+    print("=========check your configuration========")
+    for key, value in parsed_args.items():
+        print(f"  {key}: {value}")
+
     aeong = get_binary(args)
     client = runners.Client(args.client_binary, args.data_directory, memgraph_port=7687)
     # if args.binary_type == "aeong":
     client.execute(file_path=args.index_cypher_path, num_workers=args.num_workers)
     # Evaluate temporal query
-    client.execute(file_path=args.temporal_query_cypher_path, num_workers=args.num_workers)
-    temporal_q_ret = client.execute(file_path=args.temporal_query_cypher_path, num_workers=args.num_workers)
+    #client.execute(file_path=args.temporal_query_cypher_path, num_workers=args.num_workers)
+    temporal_q_ret = client.execute(file_path=args.temporal_query_cypher_path, num_workers=args.num_workers, output=args.output)
     print("temporal query latency(s):", temporal_q_ret[0]['duration']/temporal_q_ret[0]['count'])
     aeong.stop()

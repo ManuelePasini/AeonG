@@ -23,7 +23,7 @@ mkdir -p $prefix_path/database/aeong
 database_directory="--data-directory $prefix_path/database/aeong"
 original_dataset="--original-dataset-cypher-path $mgbench_download_dir/small.cypher"
 index_path="--index-cypher-path $mgbench_download_dir/cypher_index.cypher"
-echo ";" > $index_path
+#echo ";" > $index_path
 graph_op_cypher_path="--graph-operation-cypher-path $graph_op_path/cypher.txt"
 python_script="../scripts/create_temporal_database.py"
 
