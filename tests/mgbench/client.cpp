@@ -162,119 +162,122 @@ struct QueryResult {
 };
 
 void Execute(const std::vector<std::pair<std::string, std::map<std::string, communication::bolt::Value>>> &queries,
-             std::ostream *stream) {
-  std::vector<std::thread> threads;
-  threads.reserve(FLAGS_num_workers);
+  std::ostream *stream) {
+std::vector<std::thread> threads;
+threads.reserve(FLAGS_num_workers);
 
-  std::vector<std::vector<QueryResult>> worker_results(FLAGS_num_workers);
-  std::vector<Metadata> worker_metadata(FLAGS_num_workers);
-  std::vector<uint64_t> worker_retries(FLAGS_num_workers, 0);
-  std::vector<double> worker_duration(FLAGS_num_workers, 0.0);
+std::vector<std::vector<QueryResult>> worker_results(FLAGS_num_workers);
+std::vector<Metadata> worker_metadata(FLAGS_num_workers);
+std::vector<uint64_t> worker_retries(FLAGS_num_workers, 0);
+std::vector<double> worker_duration(FLAGS_num_workers, 0.0);
 
-  std::atomic<bool> run(false);
-  std::atomic<uint64_t> ready(0);
-  std::atomic<uint64_t> position(0);
-  const auto total = queries.size();
+std::atomic<bool> run(false);
+std::atomic<uint64_t> ready(0);
+std::atomic<uint64_t> position(0);
+const auto total = queries.size();
 
-  for (size_t w = 0; w < FLAGS_num_workers; ++w) {
-    threads.emplace_back([&, w]() {
-      io::network::Endpoint endpoint(FLAGS_address, FLAGS_port);
-      communication::ClientContext context(FLAGS_use_ssl);
-      communication::bolt::Client client(&context);
-      client.Connect(endpoint, FLAGS_username, FLAGS_password);
+for (size_t w = 0; w < FLAGS_num_workers; ++w) {
+threads.emplace_back([&, w]() {
+io::network::Endpoint endpoint(FLAGS_address, FLAGS_port);
+communication::ClientContext context(FLAGS_use_ssl);
+communication::bolt::Client client(&context);
+client.Connect(endpoint, FLAGS_username, FLAGS_password);
 
-      ready.fetch_add(1);
-      while (!run.load());
+ready.fetch_add(1);
+while (!run.load());
 
-      Metadata &meta = worker_metadata[w];
-      auto &retry_cnt = worker_retries[w];
-      auto &results = worker_results[w];
-      utils::Timer timer;
+Metadata &meta = worker_metadata[w];
+auto &retry_cnt = worker_retries[w];
+auto &results = worker_results[w];
+utils::Timer timer;
 
-      while (true) {
-        auto idx = position.fetch_add(1);
-        if (idx >= total) break;
-        const auto &q = queries[idx];
-        auto ret = client.Execute(q.first, q.second);
-        retry_cnt += 0;
-        meta.Append(ret.metadata);
+while (true) {
+auto idx = position.fetch_add(1);
+if (idx >= total) break;
+const auto &q = queries[idx];
 
-        // Extract column names from metadata
-        std::vector<std::string> cols;
-        auto fields_it = ret.metadata.find("fields");
-        if (fields_it != ret.metadata.end()) {
-          const auto &fields = fields_it->second.ValueList();
-          for (const auto &f : fields) cols.push_back(f.ValueString());
-        }
+auto [metadata, retries] = ExecuteNTimesTillSuccess(&client, q.first, q.second, FLAGS_max_retries);
+retry_cnt += retries;
+meta.Append(metadata);
 
-        // Build QueryResult
-        QueryResult qr;
-        qr.query = q.first;
-        qr.parameters = q.second;
-        qr.retries = 0;
-
-        for (const auto &row : ret.records) {
-          std::map<std::string, communication::bolt::Value> rec;
-          for (size_t i = 0; i < row.size(); ++i) rec.emplace(cols[i], row[i]);
-          qr.results.push_back(std::move(rec));
-        }
-        results.push_back(std::move(qr));
-      }
-      worker_duration[w] = timer.Elapsed().count();
-      client.Close();
-    });
-  }
-
-  while (ready.load() < FLAGS_num_workers);
-  run.store(true);
-  for (auto &t : threads) t.join();
-
-  // Aggregate
-  Metadata final_meta;
-  uint64_t total_retries = 0;
-  double total_dur = 0;
-  std::vector<QueryResult> all;
-  for (size_t w = 0; w < FLAGS_num_workers; ++w) {
-    final_meta += worker_metadata[w];
-    total_retries += worker_retries[w];
-    total_dur += worker_duration[w];
-    all.insert(all.end(),
-               std::make_move_iterator(worker_results[w].begin()),
-               std::make_move_iterator(worker_results[w].end()));
-  }
-  double avg_dur = total_dur / FLAGS_num_workers;
-
-  // Build output JSON
-  nlohmann::json out;
-  out["summary"] = {
-    {"count", total},
-    {"duration", avg_dur},
-    {"throughput", total / avg_dur},
-    {"retries", total_retries},
-    {"metadata", final_meta.Export()},
-    {"num_workers", FLAGS_num_workers}
-  };
-  out["queries"] = nlohmann::json::array();
-  for (auto &r : all) {
-    nlohmann::json item;
-    item["query"] = r.query;
-    nlohmann::json pjs;
-    for (auto &p : r.parameters) pjs[p.first] = BoltValueToJson(p.second);
-    item["parameters"] = pjs;
-    nlohmann::json tup;
-    for (auto &rec : r.results) {
-      nlohmann::json rowj;
-      for (auto &c : rec) rowj[c.first] = BoltValueToJson(c.second);
-      tup.push_back(rowj);
-    }
-    item["results"] = tup;
-    item["retries"] = r.retries;
-    out["queries"].push_back(item);
-  }
-
-  std::ostream &os = *stream;
-  os << out.dump(2) << std::endl;
+// Extract column names from metadata
+std::vector<std::string> cols;
+auto fields_it = metadata.find("fields");
+if (fields_it != metadata.end()) {
+const auto &fields = fields_it->second.ValueList();
+for (const auto &f : fields) cols.push_back(f.ValueString());
 }
+
+// Build QueryResult
+QueryResult qr;
+qr.query = q.first;
+qr.parameters = q.second;
+qr.retries = retries;
+
+auto ret = client.Execute(q.first, q.second);
+for (const auto &row : ret.records) {
+std::map<std::string, communication::bolt::Value> rec;
+for (size_t i = 0; i < row.size(); ++i) rec.emplace(cols[i], row[i]);
+qr.results.push_back(std::move(rec));
+}
+results.push_back(std::move(qr));
+}
+worker_duration[w] = timer.Elapsed().count();
+client.Close();
+});
+}
+
+while (ready.load() < FLAGS_num_workers);
+run.store(true);
+for (auto &t : threads) t.join();
+
+// Aggregate
+Metadata final_meta;
+uint64_t total_retries = 0;
+double total_dur = 0;
+std::vector<QueryResult> all;
+for (size_t w = 0; w < FLAGS_num_workers; ++w) {
+final_meta += worker_metadata[w];
+total_retries += worker_retries[w];
+total_dur += worker_duration[w];
+all.insert(all.end(),
+    std::make_move_iterator(worker_results[w].begin()),
+    std::make_move_iterator(worker_results[w].end()));
+}
+double avg_dur = total_dur / FLAGS_num_workers;
+
+// Build output JSON
+nlohmann::json out;
+out["summary"] = {
+{"count", total},
+{"duration", avg_dur},
+{"throughput", total / avg_dur},
+{"retries", total_retries},
+{"metadata", final_meta.Export()},
+{"num_workers", FLAGS_num_workers}
+};
+out["queries"] = nlohmann::json::array();
+for (auto &r : all) {
+nlohmann::json item;
+item["query"] = r.query;
+nlohmann::json pjs;
+for (auto &p : r.parameters) pjs[p.first] = BoltValueToJson(p.second);
+item["parameters"] = pjs;
+nlohmann::json tup;
+for (auto &rec : r.results) {
+nlohmann::json rowj;
+for (auto &c : rec) rowj[c.first] = BoltValueToJson(c.second);
+tup.push_back(rowj);
+}
+item["results"] = tup;
+item["retries"] = r.retries;
+out["queries"].push_back(item);
+}
+
+std::ostream &os = *stream;
+os << out.dump(2) << std::endl;
+}
+
 
 int main(int argc, char **argv) {
   gflags::ParseCommandLineFlags(&argc, &argv, true);

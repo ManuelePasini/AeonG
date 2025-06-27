@@ -76,5 +76,5 @@ if __name__ == "__main__":
     # Evaluate temporal query
     #client.execute(file_path=args.temporal_query_cypher_path, num_workers=args.num_workers)
     temporal_q_ret = client.execute(file_path=args.temporal_query_cypher_path, num_workers=args.num_workers, output=args.output)
-    print("temporal query latency(s):", temporal_q_ret[0]['duration']/temporal_q_ret[0]['count'])
+    print("temporal query latency(s):", temporal_q_ret[0]['duration'])
     aeong.stop()
