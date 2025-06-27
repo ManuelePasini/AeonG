@@ -208,5 +208,5 @@ if __name__ == "__main__":
         time.sleep(60)
 
     aeong.stop()
-    print(graph_op_ret[0]['duration'] / graph_op_ret[0]['count'],
+    print(graph_op_ret[0]['duration'],
         get_space(args.data_directory, args.binary_type) / 1024 / 1024, start_time, end_time)
