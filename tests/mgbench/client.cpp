@@ -42,19 +42,36 @@ DEFINE_string(input, "", "Input file. By default stdin is used.");
 DEFINE_string(output, "", "Output file. By default stdout is used.");
 
 std::pair<std::map<std::string, communication::bolt::Value>, uint64_t> ExecuteNTimesTillSuccess(
-    communication::bolt::Client *client, const std::string &query,
-    const std::map<std::string, communication::bolt::Value> &params, int max_attempts) {
-  for (uint64_t i = 0; i < max_attempts; ++i) {
-    try {
-      auto ret = client->Execute(query, params);
-      return {std::move(ret.metadata), i};
-    } catch (const utils::BasicException &e) {
+  communication::bolt::Client *client, const std::string &query,
+  const std::map<std::string, communication::bolt::Value> &params, int max_attempts) {
+
+for (uint64_t i = 0; i < max_attempts; ++i) {
+  try {
+    auto ret = client->Execute(query, params);
+    return {std::move(ret.metadata), i};
+  } catch (const communication::bolt::ClientQueryException &e) {
+    // Gestione specifica del caso di conflitto di transazioni
+    std::string err_msg = e.what();
+    if (err_msg.find("Cannot resolve conflicting transactions") != std::string::npos) {
       if (i == max_attempts - 1) {
-        LOG_FATAL("Could not execute query '{}' {} times! Error message: {}", query, max_attempts, e.what());
+        LOG_FATAL("Query '{}' failed due to transaction conflict after {} retries. Last error: {}", query, max_attempts, e.what());
       }
+      // Piccola attesa prima di riprovare (ad esempio 100ms)
+      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+      continue;
+    } else {
+      // Qualsiasi altro errore lo rilancio
+      throw;
     }
+  } catch (const utils::BasicException &e) {
+    if (i == max_attempts - 1) {
+      LOG_FATAL("Could not execute query '{}' {} times! Error message: {}", query, max_attempts, e.what());
+    }
+    // Piccola attesa prima di riprovare (ad esempio 100ms)
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
   }
-  LOG_FATAL("Could not execute query '{}' {} times!", query, max_attempts);
+}
+LOG_FATAL("Could not execute query '{}' {} times!", query, max_attempts);
 }
 
 communication::bolt::Value JsonToBoltValue(const nlohmann::json &data) {
