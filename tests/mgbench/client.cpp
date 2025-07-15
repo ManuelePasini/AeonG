@@ -191,7 +191,8 @@ void Execute(const std::vector<std::pair<std::string, std::map<std::string, comm
         auto pos = position.fetch_add(1, std::memory_order_acq_rel);
         if (pos >= size) break;
         const auto &query = queries[pos];
-        auto ret = ExecuteNTimesTillSuccess(&client, query.first, query.second, worker+1, FLAGS_max_retries);
+        int query_id = worker + 1;
+        auto ret = ExecuteNTimesTillSuccess(&client, query.first, query.second, query_id, FLAGS_max_retries);
         retries += ret.second;
         metadata.Append(ret.first);
       }

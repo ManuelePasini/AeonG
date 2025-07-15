@@ -137,7 +137,7 @@ class Client final {
     SPDLOG_INFO("Metadata of init message response: {}", metadata);
   }
 
-void WriteReportToFile(const QueryData &result, const std::string &queryId) {
+void WriteReportToFile(const QueryData &result, int queryId) {
     const std::string folderPath = "/query_results";
     const std::string filePath = folderPath + "/report_query" + queryId + ".txt";
 
