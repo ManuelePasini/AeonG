@@ -20,6 +20,9 @@
 #include "io/network/endpoint.hpp"
 #include "utils/exceptions.hpp"
 #include "utils/logging.hpp"
+#include <fstream>
+#include <iostream>
+#include <filesystem>
 
 namespace communication::bolt {
 
@@ -134,13 +137,64 @@ class Client final {
     SPDLOG_INFO("Metadata of init message response: {}", metadata);
   }
 
+void WriteReportToFile(const QueryData &result, const std::string &queryId) {
+    const std::string folderPath = "/query_results";
+    const std::string filePath = folderPath + "/report_" + queryId + ".txt";
+
+    // Crea la cartella /query_results se non esiste
+    try {
+        std::filesystem::create_directories(folderPath);
+    } catch (const std::exception &e) {
+        std::cerr << "Errore nella creazione della directory: " << folderPath << "\n"
+                  << e.what() << "\n";
+        return;
+    }
+
+    std::ofstream out(filePath);
+    if (!out.is_open()) {
+        std::cerr << "Errore nell'apertura del file: " << filePath << "\n";
+        return;
+    }
+
+    // Header
+    out << "==== QUERY RESULT REPORT ====\n\n";
+
+    // Fields
+    out << "Fields:\n";
+    for (const auto &field : result.fields) {
+        out << "  - " << field << "\n";
+    }
+    out << "\n";
+
+    // Records
+    out << "Records (" << result.records.size() << " rows):\n";
+    for (const auto &row : result.records) {
+        out << "  [ ";
+        for (const auto &val : row) {
+            out << val.ToString() << " ";
+        }
+        out << "]\n";
+    }
+    out << "\n";
+
+    // Metadata
+    out << "Metadata:\n";
+    for (const auto &entry : result.metadata) {
+        out << "  " << entry.first << ": " << entry.second.ToString() << "\n";
+    }
+
+    out << "\n==== END OF REPORT ====\n";
+
+    out.close();
+}
+  
   /// Function used to execute queries against the server. Before you can
   /// execute queries you must connect the client to the server.
   /// @throws ClientQueryException when there is some transient error while
   ///                              executing the query (eg. mistyped query,
   ///                              etc.)
   /// @throws ClientFatalException when we couldn't communicate with the server
-  QueryData Execute(const std::string &query, const std::map<std::string, Value> &parameters) {
+  QueryData Execute(const std::string &query, const std::map<std::string, Value> &parameters, const std::string &query_id = "") {
     if (!client_.IsConnected()) {
       throw ClientFatalException("You must first connect to the server before using the client!");
     }
@@ -243,6 +297,8 @@ class Client final {
       ret.fields.emplace_back(std::move(field_item.ValueString()));
     }
 
+    WriteReportToFile(ret, query_id);
+    
     return ret;
   }
 

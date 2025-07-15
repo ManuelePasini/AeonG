@@ -51,10 +51,10 @@ DEFINE_string(output, "", "Output file. By default stdout is used.");
 
 std::pair<std::map<std::string, communication::bolt::Value>, uint64_t> ExecuteNTimesTillSuccess(
     communication::bolt::Client *client, const std::string &query,
-    const std::map<std::string, communication::bolt::Value> &params, int max_attempts) {
+    const std::map<std::string, communication::bolt::Value> &params, const std::string &query_Id, int max_attempts) {
   for (uint64_t i = 0; i < max_attempts; ++i) {
     try {
-      auto ret = client->Execute(query, params);
+      auto ret = client->Execute(query, params, queryId);
       return {std::move(ret.metadata), i};
     } catch (const utils::BasicException &e) {
       if (i == max_attempts - 1) {
@@ -191,7 +191,7 @@ void Execute(const std::vector<std::pair<std::string, std::map<std::string, comm
         auto pos = position.fetch_add(1, std::memory_order_acq_rel);
         if (pos >= size) break;
         const auto &query = queries[pos];
-        auto ret = ExecuteNTimesTillSuccess(&client, query.first, query.second, FLAGS_max_retries);
+        auto ret = ExecuteNTimesTillSuccess(&client, query.first, query.second, worker+1, FLAGS_max_retries);
         retries += ret.second;
         metadata.Append(ret.first);
       }
