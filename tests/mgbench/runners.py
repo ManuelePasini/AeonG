@@ -283,8 +283,8 @@ class Client:
 
         args = self._get_args(input=file_path, num_workers=num_workers,
                               queries_json=queries_json, max_retries=10000, port=self._port, output=output)
-        print("NOW PRINTING ARGS")
-        print("args:",args)
+        # print("NOW PRINTING ARGS")
+        # print("args:",args)
 
         ret = subprocess.run(args, stdout=subprocess.PIPE, check=True)
         data = ret.stdout.decode("utf-8").strip().split("\n")

@@ -65,9 +65,9 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     parsed_args = vars(args)
-    print("=========check your configuration========")
-    for key, value in parsed_args.items():
-        print(f"  {key}: {value}")
+    # print("=========check your configuration========")
+    # for key, value in parsed_args.items():
+    #     print(f"  {key}: {value}")
 
     aeong = get_binary(args)
     client = runners.Client(args.client_binary, args.data_directory, memgraph_port=7687)
