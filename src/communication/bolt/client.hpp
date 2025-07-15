@@ -139,7 +139,7 @@ class Client final {
 
 void WriteReportToFile(const QueryData &result, const std::string &queryId) {
     const std::string folderPath = "/query_results";
-    const std::string filePath = folderPath + "/report_" + queryId + ".txt";
+    const std::string filePath = folderPath + "/report_query" + queryId + ".txt";
 
     // Crea la cartella /query_results se non esiste
     try {
@@ -298,7 +298,7 @@ void WriteReportToFile(const QueryData &result, const std::string &queryId) {
     }
 
     WriteReportToFile(ret, query_id);
-    
+
     return ret;
   }
 

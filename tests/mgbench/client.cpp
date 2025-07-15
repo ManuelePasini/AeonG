@@ -51,7 +51,7 @@ DEFINE_string(output, "", "Output file. By default stdout is used.");
 
 std::pair<std::map<std::string, communication::bolt::Value>, uint64_t> ExecuteNTimesTillSuccess(
     communication::bolt::Client *client, const std::string &query,
-    const std::map<std::string, communication::bolt::Value> &params, const std::string &query_Id, int max_attempts) {
+    const std::map<std::string, communication::bolt::Value> &params, int &query_Id, int max_attempts) {
   for (uint64_t i = 0; i < max_attempts; ++i) {
     try {
       auto ret = client->Execute(query, params, query_Id);
