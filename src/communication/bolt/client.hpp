@@ -194,7 +194,7 @@ void WriteReportToFile(const QueryData &result, int queryId) {
   ///                              executing the query (eg. mistyped query,
   ///                              etc.)
   /// @throws ClientFatalException when we couldn't communicate with the server
-  QueryData Execute(const std::string &query, const std::map<std::string, Value> &parameters, const std::string &query_id = "") {
+  QueryData Execute(const std::string &query, const std::map<std::string, Value> &parameters, int queryId = "") {
     if (!client_.IsConnected()) {
       throw ClientFatalException("You must first connect to the server before using the client!");
     }
@@ -297,7 +297,7 @@ void WriteReportToFile(const QueryData &result, int queryId) {
       ret.fields.emplace_back(std::move(field_item.ValueString()));
     }
 
-    WriteReportToFile(ret, query_id);
+    WriteReportToFile(ret, queryId);
 
     return ret;
   }
