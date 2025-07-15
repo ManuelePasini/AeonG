@@ -1,1 +1,1 @@
-MATCH (device:Sensor)-[:hasCoverage]-(environment:Infrastructure),(device)-[:hasTemperature]-(temp:Temperature) TT FROM 0 TO 116945 RETURN environment, device, AVG(temp.value);
+MATCH (device:Sensor)-[:hasCoverage]-(environment:Infrastructure),(device)-[:hasTemperature]-(temp:Temperature) TT FROM 0 TO 1363755 RETURN environment, device, AVG(temp.value);
