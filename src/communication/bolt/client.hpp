@@ -139,7 +139,7 @@ class Client final {
 
 void WriteReportToFile(const QueryData &result, int queryId) {
     const std::string folderPath = "/query_results";
-    const std::string filePath = folderPath + "/report_query" + queryId + ".txt";
+    const std::string filePath = folderPath + "/report_query" + std::to_string(queryId) + ".txt";
 
     // Crea la cartella /query_results se non esiste
     try {
@@ -171,7 +171,7 @@ void WriteReportToFile(const QueryData &result, int queryId) {
     for (const auto &row : result.records) {
         out << "  [ ";
         for (const auto &val : row) {
-            out << val.ToString() << " ";
+            out << val << " ";
         }
         out << "]\n";
     }
@@ -180,7 +180,7 @@ void WriteReportToFile(const QueryData &result, int queryId) {
     // Metadata
     out << "Metadata:\n";
     for (const auto &entry : result.metadata) {
-        out << "  " << entry.first << ": " << entry.second.ToString() << "\n";
+        out << "  " << entry.first << ": " << entry.second << "\n";
     }
 
     out << "\n==== END OF REPORT ====\n";
