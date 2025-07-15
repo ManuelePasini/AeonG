@@ -54,7 +54,7 @@ std::pair<std::map<std::string, communication::bolt::Value>, uint64_t> ExecuteNT
     const std::map<std::string, communication::bolt::Value> &params, const std::string &query_Id, int max_attempts) {
   for (uint64_t i = 0; i < max_attempts; ++i) {
     try {
-      auto ret = client->Execute(query, params, queryId);
+      auto ret = client->Execute(query, params, query_Id);
       return {std::move(ret.metadata), i};
     } catch (const utils::BasicException &e) {
       if (i == max_attempts - 1) {
