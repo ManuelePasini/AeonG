@@ -150,7 +150,8 @@ void WriteReportToFile(const QueryData &result, int queryId) {
         return;
     }
 
-    std::ofstream out(filePath);
+    // Apri il file in modalità append
+    std::ofstream out(filePath, std::ios::app);
     if (!out.is_open()) {
         std::cerr << "Errore nell'apertura del file: " << filePath << "\n";
         return;
@@ -171,7 +172,7 @@ void WriteReportToFile(const QueryData &result, int queryId) {
     for (const auto &row : result.records) {
         out << "  [ ";
         for (const auto &val : row) {
-            out << val << " ";
+            out << val.ToString() << " ";  // Assicurati che ci sia ToString()
         }
         out << "]\n";
     }
@@ -180,14 +181,13 @@ void WriteReportToFile(const QueryData &result, int queryId) {
     // Metadata
     out << "Metadata:\n";
     for (const auto &entry : result.metadata) {
-        out << "  " << entry.first << ": " << entry.second << "\n";
+        out << "  " << entry.first << ": " << entry.second.ToString() << "\n";
     }
 
-    out << "\n==== END OF REPORT ====\n";
+    out << "\n==== END OF REPORT ====\n\n";
 
     out.close();
 }
-  
   /// Function used to execute queries against the server. Before you can
   /// execute queries you must connect the client to the server.
   /// @throws ClientQueryException when there is some transient error while
@@ -296,7 +296,7 @@ void WriteReportToFile(const QueryData &result, int queryId) {
       }
       ret.fields.emplace_back(std::move(field_item.ValueString()));
     }
-    
+
     std::string upperQuery = query;
     std::transform(upperQuery.begin(), upperQuery.end(), upperQuery.begin(), ::toupper);
 
