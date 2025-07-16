@@ -172,7 +172,7 @@ void WriteReportToFile(const QueryData &result, int queryId) {
     for (const auto &row : result.records) {
         out << "  [ ";
         for (const auto &val : row) {
-            out << val.ToString() << " ";  // Assicurati che ci sia ToString()
+            out << val << " ";  // Assicurati che ci sia ToString()
         }
         out << "]\n";
     }
@@ -181,7 +181,7 @@ void WriteReportToFile(const QueryData &result, int queryId) {
     // Metadata
     out << "Metadata:\n";
     for (const auto &entry : result.metadata) {
-        out << "  " << entry.first << ": " << entry.second.ToString() << "\n";
+        out << "  " << entry.first << ": " << entry.second << "\n";
     }
 
     out << "\n==== END OF REPORT ====\n\n";
