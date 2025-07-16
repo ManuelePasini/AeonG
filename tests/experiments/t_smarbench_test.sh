@@ -17,7 +17,7 @@ pip3 install pandas
 #Create AeonG temporal database, get graph operation latency, and get space
 aeong_binary="--aeong-binary ../../build/memgraph"
 client_binary="--client-binary ../../build/tests/mgbench/client"
-number_workers="--num-workers 10"
+number_workers="--num-workers 1"
 rm -rf $prefix_path/database/aeong
 mkdir -p $prefix_path/database/aeong
 database_directory="--data-directory $prefix_path/database/aeong"

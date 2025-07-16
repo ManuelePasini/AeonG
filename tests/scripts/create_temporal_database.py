@@ -189,7 +189,8 @@ if __name__ == "__main__":
             # print("Create original database time:", (end_time - start_time) / 1000000, "s")
     else:
         if args.benchmark_type != "gmark":
-            client.execute(file_path=args.original_dataset_cypher_path, num_workers=args.num_workers)
+            pass
+            #client.execute(file_path=args.original_dataset_cypher_path, num_workers=args.num_workers)
 
     start_time = int(time.time() * 1000000)
     graph_op_ret = client.execute(file_path=args.original_dataset_cypher_path, num_workers=args.num_workers)
