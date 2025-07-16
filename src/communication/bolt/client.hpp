@@ -296,8 +296,12 @@ void WriteReportToFile(const QueryData &result, int queryId) {
       }
       ret.fields.emplace_back(std::move(field_item.ValueString()));
     }
+    std::string upperQuery = query;
+    std::transform(upperQuery.begin(), upperQuery.end(), upperQuery.begin(), ::toupper);
 
-    WriteReportToFile(ret, queryId);
+    if (upperQuery.find("SELECT") == 0) {
+        WriteReportToFile(ret, queryId);
+    }
 
     return ret;
   }
