@@ -1,1 +1,1 @@
-MATCH (environment:Infrastructure)-[:hasCoverage]-(device:Sensor {name: "Thermometer3"})-[:hasTemperature]-(temp:Temperature) WHERE temp.value > 0 RETURN device, environment;
+MATCH (environment:Infrastructure)-[:hasCoverage]-(device:Sensor {name: "Thermometer3"})-[:hasTemperature]-(temp:Temperature) WHERE temp.temperature > 0 RETURN device, environment;

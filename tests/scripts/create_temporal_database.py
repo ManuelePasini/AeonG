@@ -205,8 +205,8 @@ if __name__ == "__main__":
     if args.binary_type == "clockg":
         # need time to store historical data
         time.sleep(5 * 60)
-    if args.binary_type == "aeong":
-        time.sleep(60)
+#    if args.binary_type == "aeong":
+#        time.sleep(60)
 
     aeong.stop()
     print(graph_op_ret[0]['duration'],
