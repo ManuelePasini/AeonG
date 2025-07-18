@@ -137,11 +137,10 @@ class Client final {
     SPDLOG_INFO("Metadata of init message response: {}", metadata);
   }
 
-void WriteReportToFile(const QueryData &result, int queryId) {
+void WriteReportToFile(const QueryData &result, int queryId, std::string &query) {
     const std::string folderPath = "/query_results";
     const std::string filePath = folderPath + "/report_query" + std::to_string(queryId) + ".txt";
 
-    // Crea la cartella /query_results se non esiste
     try {
         std::filesystem::create_directories(folderPath);
     } catch (const std::exception &e) {
@@ -150,7 +149,6 @@ void WriteReportToFile(const QueryData &result, int queryId) {
         return;
     }
 
-    // Apri il file in modalità append
     std::ofstream out(filePath, std::ios::app);
     if (!out.is_open()) {
         std::cerr << "Errore nell'apertura del file: " << filePath << "\n";
@@ -159,6 +157,9 @@ void WriteReportToFile(const QueryData &result, int queryId) {
 
     // Header
     out << "==== QUERY RESULT REPORT ====\n\n";
+
+    out << "Query:\n";
+    out << query << "\n\n";
 
     // Fields
     out << "Fields:\n";
@@ -172,7 +173,7 @@ void WriteReportToFile(const QueryData &result, int queryId) {
     for (const auto &row : result.records) {
         out << "  [ ";
         for (const auto &val : row) {
-            out << val << " ";  // Assicurati che ci sia ToString()
+            out << val << " "; 
         }
         out << "]\n";
     }
@@ -301,7 +302,7 @@ void WriteReportToFile(const QueryData &result, int queryId) {
     std::transform(upperQuery.begin(), upperQuery.end(), upperQuery.begin(), ::toupper);
 
     if (upperQuery.find("RETURN") != std::string::npos) {
-        WriteReportToFile(ret, queryId);
+        WriteReportToFile(ret, queryId, upperQuery);
     }
 
     return ret;
