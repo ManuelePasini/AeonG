@@ -281,8 +281,12 @@ class Client:
                 for query in queries:
                     print("query", query)
 
-        args = self._get_args(input=file_path, num_workers=num_workers,
-                              queries_json=queries_json, max_retries=10000, port=self._port, output=output)
+        if output is None:
+            args = self._get_args(input=file_path, num_workers=num_workers,
+                            queries_json=queries_json, max_retries=10000, port=self._port)
+        else:
+            args = self._get_args(input=file_path, num_workers=num_workers,
+                            queries_json=queries_json, max_retries=10000, port=self._port, output=output)
         # print("NOW PRINTING ARGS")
         # print("args:",args)
 
