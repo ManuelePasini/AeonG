@@ -1,1 +1,1 @@
-MATCH (device:Sensor)-[:hasCoverage]-(environment:Infrastructure),(device)-[:hasTemperature]-(temp:Temperature),(device)-[:hasOwner]-(owner:User) WHERE temp.temperature > 20 TT FROM 0 TO 2727510 RETURN device, environment, owner.emailId;
+MATCH (device:Sensor)-[:hasOwner]-(owner), (environment:Infrastructure)<-[:hasCoverage]-(device)-[:hasTemperature]->(temp:Temperature) WHERE temp.temperature > 20 TT FROM 0 TO 8158670 RETURN DISTINCT device, environment, owner;

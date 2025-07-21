@@ -17,14 +17,6 @@ temporal_q4_long="--temporal-query-cypher-path $temporal_query_path/cypher_Q4_lo
 temporal_q5="--temporal-query-cypher-path $temporal_query_path/cypher_Q5.txt"
 temporal_q6="--temporal-query-cypher-path $temporal_query_path/cypher_Q6.txt"
 
-temporal_q1_flat="--temporal-query-cypher-path $temporal_query_path/cypher_Q1_flat.txt"
-temporal_q2_flat="--temporal-query-cypher-path $temporal_query_path/cypher_Q2_flat.txt"
-temporal_q3_flat="--temporal-query-cypher-path $temporal_query_path/cypher_Q3_flat.txt"
-temporal_q4_flat="--temporal-query-cypher-path $temporal_query_path/cypher_Q4_flat.txt"
-temporal_q4_flat_long="--temporal-query-cypher-path $temporal_query_path/cypher_Q4_flat_long.txt"
-temporal_q5_flat="--temporal-query-cypher-path $temporal_query_path/cypher_Q5_flat.txt"
-temporal_q6_flat="--temporal-query-cypher-path $temporal_query_path/cypher_Q6_flat.txt"
-
 output_q1="--output /q1.json"
 output_q2="--output /q2.json"
 output_q3="--output /q3.json"
@@ -33,13 +25,6 @@ output_q4_long="--output /q4_long.json"
 output_q5="--output /q5.json"
 output_q6="--output /q6.json"
 
-output_q1_flat="--output /q1_flat.json"
-output_q2_flat="--output /q2_flat.json"
-output_q3_flat="--output /q3_flat.json"
-output_q4_flat="--output /q4_flat.json"
-output_q4_flat_long="--output /q4_flat_long.json"
-output_q5_flat="--output /q5_flat.json"
-output_q6_flat="--output /q6_flat.json"
 
 echo "AeonG q1 mix"
 python3 "$python_script" $aeong_binary $client_binary $number_workers $database_directory $index_path $temporal_q1 $output_q1

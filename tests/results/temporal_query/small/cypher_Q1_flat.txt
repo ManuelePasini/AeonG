@@ -1,1 +1,0 @@
-MATCH (temp:Temperature)-[:hasTemperature]-(device)-[:hasCoverage]-(environment:Infrastructure {name: "3042"}) WHERE temp.value > 0 RETURN environment, device;

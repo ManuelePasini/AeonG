@@ -1,1 +1,0 @@
-MATCH (device:Sensor)-[:hasCoverage]-(environment:Infrastructure),(device)-[:hasTemperature]-(temp:Temperature) WHERE temp.temperature > 20 TT FROM 0 TO 2727510 RETURN environment;
