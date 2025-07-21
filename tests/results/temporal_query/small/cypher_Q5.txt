@@ -1,1 +1,0 @@
-MATCH (environment:Infrastructure)-[:hasInfrastructure]-(device:Sensor)-[:hasTemperature]-(temp:Temperature) TT FROM 0 TO 11269070 RETURN device, environment, MAX(temp.temperature) AS maxValue;
