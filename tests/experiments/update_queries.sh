@@ -1,10 +1,8 @@
 #!/bin/bash
 
 set -euo pipefail
-
-# Controllo del parametro
 if [[ $# -ne 2 ]]; then
-    echo "Usage: $0 <size: small | large | big>, $1 <Path to queries files>"
+    echo "Usage: $0 <size: small | large | big> <Path to query input files>"
     exit 1
 fi
 
@@ -17,22 +15,30 @@ if [[ ! -f "$CONFIG_FILE" ]]; then
     exit 1
 fi
 
-# Get query names from the config file
-query_names=$(grep '^[A-Za-z]' "$CONFIG_FILE" | sed 's/://')
+# Get query input files
+query_keys=$(grep '^[a-zA-Z0-9_]\+:' "$CONFIG_FILE" | sed 's/://')
 
-for query in $query_names; do
-    # Get the corresponding temporal constraint for the given size
-    value=$(awk -v q="$query" -v s="$SIZE" '
-        $1 == q":" {found=1}
+for key in $query_keys; do
+    # Get query name
+    name=$(awk -v k="$key" '
+        $1 == k":" {found=1}
+        found && $1 == "name:" {gsub(/"/, "", $2); print $2; exit}
+    ' "$CONFIG_FILE")
+
+    # Get the timestamp value for the specified size
+    value=$(awk -v k="$key" -v s="$SIZE" '
+        $1 == k":" {found=1}
         found && $1 == s":" {gsub(/[ \t]*:$/, "", $2); print $2; exit}
     ' "$CONFIG_FILE")
 
-    # Update the query file with the temporal constraint
-    txt_file="${QUERY_PATH}${query}.txt"
-    if [[ -f "$txt_file" ]]; then
-        echo "Updating $txt_file temporal constraint to $SIZE value: $value"
-        sed -i "s/{TSTAMPTO_PARAM}/$value/g" "$txt_file"
+    # File input: q2.txt (ecc.), File output: EnvironmentAggregate.txt (ecc.)
+    input_file="${QUERY_PATH}${key}.txt"
+    output_file="${QUERY_PATH}${name}.txt"
+
+    if [[ -f "$input_file" ]]; then
+        echo "Generating $output_file with timestamp value $value from $input_file"
+        sed "s/{TSTAMPTO_PARAM}/$value/g" "$input_file" > "$output_file"
     else
-        echo "File $txt_file non trovato, salto."
+        echo "File $input_file non trovato, salto."
     fi
 done

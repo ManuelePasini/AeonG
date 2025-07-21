@@ -1,0 +1,1 @@
+MATCH (environment:Infrastructure)-[:hasCoverage]-(device:Sensor)-[:hasTemperature]-(temp:Temperature) WHERE temp.temperature > 20 TT FROM 0 TO {TSTAMPTO_PARAM} RETURN DISTINCT environment;
