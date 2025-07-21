@@ -35,6 +35,10 @@ start_time=$(echo "$output" | awk '{print $3}')
 end_time=$(echo "$output" | awk '{print $4}')-
 temporal_query_path=$prefix_path"temporal_query/small"
 
+
+SIZE="$1"
+./update_queries.sh "$SIZE" "$temporal_query_path/"
+
 echo "=============AeonG graph operation latency & spance==========="
 echo "graph_op_latency:$graph_op_latency"
 echo "storage_consumption:$storage_consumption"

@@ -3,12 +3,13 @@
 set -euo pipefail
 
 # Controllo del parametro
-if [[ $# -ne 1 ]]; then
-    echo "Uso: $0 <size: small | large | big>"
+if [[ $# -ne 2 ]]; then
+    echo "Usage: $0 <size: small | large | big>, $1 <Path to queries files>"
     exit 1
 fi
 
 SIZE="$1"
+QUERY_PATH="$2"
 CONFIG_FILE="time_constraints.yaml"
 
 if [[ ! -f "$CONFIG_FILE" ]]; then
@@ -16,20 +17,20 @@ if [[ ! -f "$CONFIG_FILE" ]]; then
     exit 1
 fi
 
-# Estrai tutte le chiavi principali dallo YAML
+# Get query names from the config file
 query_names=$(grep '^[A-Za-z]' "$CONFIG_FILE" | sed 's/://')
 
 for query in $query_names; do
-    # Estrai il valore corrispondente alla size dalla sezione della query
+    # Get the corresponding temporal constraint for the given size
     value=$(awk -v q="$query" -v s="$SIZE" '
         $1 == q":" {found=1}
         found && $1 == s":" {gsub(/[ \t]*:$/, "", $2); print $2; exit}
     ' "$CONFIG_FILE")
 
-    # Verifica se il file esiste
-    txt_file="${query}.txt"
+    # Update the query file with the temporal constraint
+    txt_file="${QUERY_PATH}${query}.txt"
     if [[ -f "$txt_file" ]]; then
-        echo "Aggiorno $txt_file con $value"
+        echo "Updating $txt_file temporal constraint to $SIZE value: $value"
         sed -i "s/{TSTAMPTO_PARAM}/$value/g" "$txt_file"
     else
         echo "File $txt_file non trovato, salto."

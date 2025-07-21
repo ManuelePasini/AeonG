@@ -8,6 +8,7 @@ client_binary="--client-binary ../../build/tests/mgbench/client"
 number_workers="--num-workers 1"
 database_directory="--data-directory $prefix_path/database/aeong"
 index_path="--index-cypher-path ../datasets/T-mgBench/cypher_index.cypher"
+temporal_query_path=$prefix_path"temporal_query/small"
 python_script="../scripts/evaluate_temporal_q.py"
 temporal_q1="--temporal-query-cypher-path $temporal_query_path/cypher_Q1.txt"
 temporal_q2="--temporal-query-cypher-path $temporal_query_path/cypher_Q2.txt"
@@ -25,6 +26,8 @@ output_q4_long="--output /q4_long.json"
 output_q5="--output /q5.json"
 output_q6="--output /q6.json"
 
+SIZE="$1"
+./update_queries.sh "$SIZE" "$temporal_query_path/"
 
 echo "AeonG q1 mix"
 python3 "$python_script" $aeong_binary $client_binary $number_workers $database_directory $index_path $temporal_q1 $output_q1
