@@ -6,6 +6,7 @@ echo "storage_consumption:$storage_consumption"
 aeong_binary="--aeong-binary ../../build/memgraph"
 client_binary="--client-binary ../../build/tests/mgbench/client"
 number_workers="--num-workers 1"
+prefix_path="../results/"
 database_directory="--data-directory $prefix_path/database/aeong"
 index_path="--index-cypher-path ../datasets/T-mgBench/cypher_index.cypher"
 temporal_query_path=$prefix_path"temporal_query/small"
@@ -36,8 +37,6 @@ echo "AeonG q3 mix"
 python3 "$python_script" $aeong_binary $client_binary $number_workers $database_directory $index_path $temporal_q3 $output_q3
 echo "AeonG q4 mix"
 python3 "$python_script" $aeong_binary $client_binary $number_workers $database_directory $index_path $temporal_q4 $output_q4
-echo "AeonG q4 mix_long"
-python3 "$python_script" $aeong_binary $client_binary $number_workers $database_directory $index_path $temporal_q4_long $output_q4_long
 echo "AeonG q5 mix"
 python3 "$python_script" $aeong_binary $client_binary $number_workers $database_directory $index_path $temporal_q5 $output_q5
 echo "AeonG q6 mix"

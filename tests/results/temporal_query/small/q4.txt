@@ -1,1 +1,1 @@
-MATCH (device:Sensor)-[:hasOwner]-(owner), (environment:Infrastructure)<-[:hasCoverage]-(device)-[:hasTemperature]->(temp:Temperature) WHERE temp.temperature > 20 TT FROM 0 TO {TSTAMPTO_PARAM} RETURN DISTINCT device, environment, owner;
+MATCH (environment:Infrastructure)-[:hasCoverage]-(device:Sensor)-[:hasTemperature]-(temp:Temperature) WHERE temp.temperature > 65 TT FROM 0 TO {TSTAMPTO_PARAM} RETURN DISTINCT environment;
