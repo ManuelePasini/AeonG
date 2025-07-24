@@ -1,4 +1,5 @@
 
+#!/bin/bash
 echo "=============AeonG graph operation latency & spance==========="
 echo "graph_op_latency:$graph_op_latency"
 echo "storage_consumption:$storage_consumption"
