@@ -70,7 +70,7 @@ class Memgraph:
         self._storage_gc_cycle_sec = storage_gc_cycle_sec
         self._real_time_flag = real_time_flag
         self._retention_on_startup = retention_on_startup
-        self._retention_interval_sec = retention_interval_sec  # 默认每60秒check一次是否删除
+        self._retention_interval_sec = retention_interval_sec 
         self._retention_period_sec = retention_period_sec
 
         atexit.register(self._cleanup)
@@ -80,7 +80,7 @@ class Memgraph:
         self._memgraph_version = (0, 50, 0)
 
     def _get_args(self, **kwargs):
-        data_directory = os.path.join(self._directory, "memgraph")  # self._directory.name
+        data_directory = os.path.join(self._directory, "memgraph")
         if self._memgraph_version >= (0, 50, 0):
             kwargs["data_directory"] = data_directory
             # kwargs["port"] =7688 wzy edit
