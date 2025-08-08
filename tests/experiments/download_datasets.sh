@@ -1,28 +1,24 @@
 #!/bin/bash
 
+set -e
 
-#!/bin/bash
-
-apt-get update
-wget https://mega.nz/linux/repo/xUbuntu_22.04/amd64/megacmd-xUbuntu_22.04_amd64.deb &&
-apt install -y "$PWD/megacmd-xUbuntu_22.04_amd64.deb" psmisc megatools
-
-# MEGA link (not OneDrive!)
 LINK="https://mega.nz/file/qQ8UEQDS#_6kxPINFpLjO3W0PsNnHJ1pwHXk0EpfGV7pRuLbYbUE"
-TARGET_FOLDER="./../datasets/T-mgBench"
+TARGET_FOLDER="/../datasets/T-mgBench"
 FILENAME="dataset_cypher.tar"
 
-export MEGACMD_USE_LEGACY_INTERFACE=1
-mkdir -p "$TARGET_FOLDER"
+yum update -y
+yum install -y wget tar
 
-echo "Downloading from MEGA..."
+wget https://mega.nz/linux/repo/CentOS_7/x86_64/megacmd-1.6.3-1.1.x86_64.rpm && yum install "$PWD/megacmd-1.6.3-1.1.x86_64.rpm"
+
+export PATH="$PWD:$PATH"
+export MEGACMD_USE_LEGACY_INTERFACE=1
+
+mkdir -p "$TARGET_FOLDER"
 cd "$TARGET_FOLDER" || exit 1
 
-# Kill mega-cmd-server
-killall mega-cmd-server || true
-rm -rf ~/.megaCmd/megacmdserver.lock
-
-megadl "$LINK" --path "$TARGET_FOLDER/$FILENAME"
+echo "Downloading from MEGA..."
+mega-get "$LINK" "$TARGET_FOLDER/$FILENAME"
 
 if [[ -f "$FILENAME" ]]; then
     echo "Downloaded: $FILENAME"
