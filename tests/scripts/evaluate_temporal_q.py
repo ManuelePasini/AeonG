@@ -72,7 +72,7 @@ if __name__ == "__main__":
     aeong = get_binary(args)
     client = runners.Client(args.client_binary, args.data_directory, memgraph_port=7687)
     # if args.binary_type == "aeong":
-    client.execute(file_path=args.index_cypher_path, num_workers=args.num_workers)
+    #client.execute(file_path=args.index_cypher_path, num_workers=args.num_workers)
     # Evaluate temporal query
     #client.execute(file_path=args.temporal_query_cypher_path, num_workers=args.num_workers)
     temporal_q_ret = client.execute(file_path=args.temporal_query_cypher_path, num_workers=args.num_workers, output=args.output)

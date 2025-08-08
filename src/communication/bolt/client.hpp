@@ -139,7 +139,7 @@ class Client final {
 
 void WriteReportToFile(const QueryData &result, int queryId, std::string &query) {
     const std::string folderPath = "/query_results";
-    const std::string filePath = folderPath + "/report_query" + std::to_string(queryId) + ".txt";
+    const std::string filePath = folderPath + "/report_query" + query + ".txt";
 
     try {
         std::filesystem::create_directories(folderPath);

@@ -1,44 +1,50 @@
-
 #!/bin/bash
-echo "=============AeonG graph operation latency & spance==========="
-echo "graph_op_latency:$graph_op_latency"
-echo "storage_consumption:$storage_consumption"
 
 aeong_binary="--aeong-binary ../../build/memgraph"
 client_binary="--client-binary ../../build/tests/mgbench/client"
-number_workers="--num-workers 1"
 prefix_path="../results/"
 database_directory="--data-directory $prefix_path/database/aeong"
 index_path="--index-cypher-path ../datasets/T-mgBench/cypher_index.cypher"
-temporal_query_path=$prefix_path"temporal_query/small"
+
 python_script="../scripts/evaluate_temporal_q.py"
+output_path="../results/query_results"
+query_names=("EnvironmentCoverage" "EnvironmentAggregate" "MaintenanceOwners" "EnvironmentOutlier" "AgentOutlier" "AgentHistory")
 
-temporal_q1="--temporal-query-cypher-path $temporal_query_path/EnvironmentCoverage.txt"
-temporal_q2="--temporal-query-cypher-path $temporal_query_path/EnvironmentAggregate.txt"
-temporal_q3="--temporal-query-cypher-path $temporal_query_path/MaintenanceOwners.txt"
-temporal_q4="--temporal-query-cypher-path $temporal_query_path/EnvironmentOutlier.txt"
-temporal_q5="--temporal-query-cypher-path $temporal_query_path/AgentOutlier.txt"
-temporal_q6="--temporal-query-cypher-path $temporal_query_path/AgentHistory.txt"
 
-output_q1="--output /EnvironmentCoverage.json"
-output_q2="--output /EnvironmentAggregate.json"
-output_q3="--output /MaintenanceOwners.json"
-output_q4="--output /EnvironmentOutlier.json"
-output_q5="--output /AgentOutlier.json"
-output_q6="--output /AgentHistory.json"
+# Script parameters
+size="$1"
+worker="$2"
+ITERATIONS="$3"
+temporal_query_path="${prefix_path}temporal_query/${size}"
 
-SIZE="$1"
-./update_queries.sh "$SIZE" "$temporal_query_path/"
+# Foreach dataset size
+echo "Running with size: $size"
+echo "Updating queries timespan filter for size: $size"
 
-echo "AeonG q1 mix"
-python3 "$python_script" $aeong_binary $client_binary $number_workers $database_directory $index_path $temporal_q1 $output_q1
-echo "AeonG q2 mix"
-python3 "$python_script" $aeong_binary $client_binary $number_workers $database_directory $index_path $temporal_q2 $output_q2
-echo "AeonG q3 mix"
-python3 "$python_script" $aeong_binary $client_binary $number_workers $database_directory $index_path $temporal_q3 $output_q3
-echo "AeonG q4 mix"
-python3 "$python_script" $aeong_binary $client_binary $number_workers $database_directory $index_path $temporal_q4 $output_q4
-echo "AeonG q5 mix"
-python3 "$python_script" $aeong_binary $client_binary $number_workers $database_directory $index_path $temporal_q5 $output_q5
-echo "AeonG q6 mix"
-python3 "$python_script" $aeong_binary $client_binary $number_workers $database_directory $index_path $temporal_q6 $output_q6
+./update_queries.sh "$size" "$temporal_query_path/"
+
+# Foreach number of workers
+echo "Running with $worker workers"
+number_workers="--num-workers $worker"
+    
+# Foreach iteration
+for iteration in $(seq 1 "$ITERATIONS"); do
+    echo "Running query iteration $iteration"
+
+    # Update the query output paths for the current size - worker - iteration
+    output_paths=()
+
+    for name in "${query_names[@]}"; do
+        output_paths+=("--output $output_path/${name}_sz${size}_wrk${worker}_it${iteration}.json")
+    done
+
+    # Execute the Python script for each query
+    for i in "${!query_names[@]}"; do
+        echo "AeonG ${query_names[$i]} mix"
+        temporal_query="--temporal-query-cypher-path $temporal_query_path/${query_names[$i]}.txt"
+        python3 "$python_script" \
+            $aeong_binary $client_binary $number_workers \
+            $database_directory $index_path \
+            $temporal_query ${output_paths[$i]}
+    done
+done
