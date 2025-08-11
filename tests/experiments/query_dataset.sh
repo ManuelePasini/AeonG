@@ -12,6 +12,7 @@ query_names=("EnvironmentCoverage" "EnvironmentAggregate" "MaintenanceOwners" "E
 
 
 mkdir -p "$output_path"
+
 # Script parameters
 size="$1"
 worker="$2"
