@@ -4,7 +4,7 @@
 aeong_binary="--aeong-binary ../../build/memgraph"
 client_binary="--client-binary ../../build/tests/mgbench/client"
 number_workers="--num-workers 1"
-output_path="/query_results"
+output_path="/home/tests/results/query_results/ingestion_stats"
 mgbench_download_dir="../datasets/T-mgBench"
 
 DATASET_SIZE="$1"
@@ -13,6 +13,8 @@ ITERATIONS="$2"
 # Delete old database and create a new one
 rm -rf $prefix_path/database/aeong
 mkdir -p $prefix_path/database/aeong
+
+mkdir -p "$output_path"
 
 database_directory="--data-directory $prefix_path/database/aeong"
 original_dataset="--original-dataset-cypher-path $mgbench_download_dir/$DATASET_SIZE.cypher"
