@@ -4,7 +4,7 @@
 aeong_binary="--aeong-binary ../../build/memgraph"
 client_binary="--client-binary ../../build/tests/mgbench/client"
 number_workers="--num-workers 1"
-output_path="/home/tests/results/query_results/ingestion_stats"
+output_path="/home/AeonG/tests/results/query_results/ingestion_stats"
 mgbench_download_dir="../datasets/T-mgBench"
 
 DATASET_SIZE="$1"
