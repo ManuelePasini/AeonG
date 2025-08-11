@@ -3,7 +3,7 @@
 set -e
 
 LINK="https://mega.nz/file/qQ8UEQDS#_6kxPINFpLjO3W0PsNnHJ1pwHXk0EpfGV7pRuLbYbUE"
-TARGET_FOLDER="/../datasets/T-mgBench"
+TARGET_FOLDER="/home/AeonG/tests/datasets/T-mgBench/"
 FILENAME="dataset_cypher.tar"
 
 yum update -y

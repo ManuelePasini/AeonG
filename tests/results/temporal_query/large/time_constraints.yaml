@@ -1,0 +1,24 @@
+q2:
+  name: "EnvironmentAggregate"
+  size:
+    small: 2729310
+    large: 8158670
+    big: 40770780
+q3:
+  name: "MaintenanceOwners"
+  size:
+    small: 2729310
+    large: 8158670
+    big: 40770780
+q4:
+  name: "EnvironmentOutlier"
+  size:
+    small: 2729310
+    large: 8158670
+    big: 40770780
+q5:
+  name: "AgentOutlier"
+  size:
+    small: 3766110
+    large: 11269070
+    big: 56322780

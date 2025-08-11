@@ -11,6 +11,7 @@ output_path="../results/query_results"
 query_names=("EnvironmentCoverage" "EnvironmentAggregate" "MaintenanceOwners" "EnvironmentOutlier" "AgentOutlier" "AgentHistory")
 
 
+mkdir -p "$output_path"
 # Script parameters
 size="$1"
 worker="$2"

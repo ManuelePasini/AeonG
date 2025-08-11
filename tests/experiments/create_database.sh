@@ -1,8 +1,11 @@
+#!/bin/bash
+
 #Create AeonG temporal database, get graph operation latency, and get space
 aeong_binary="--aeong-binary ../../build/memgraph"
 client_binary="--client-binary ../../build/tests/mgbench/client"
 number_workers="--num-workers 1"
-output_path="../results/query_results"
+output_path="/query_results"
+mgbench_download_dir="../datasets/T-mgBench"
 
 DATASET_SIZE="$1"
 ITERATIONS="$2"
