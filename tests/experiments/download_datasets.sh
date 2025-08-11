@@ -18,7 +18,10 @@ mkdir -p "$TARGET_FOLDER"
 cd "$TARGET_FOLDER" || exit 1
 
 echo "Downloading from MEGA..."
-mega-get "$LINK" "$TARGET_FOLDER/$FILENAME"
+if ! mega-get "$LINK" "$TARGET_FOLDER/$FILENAME"; then
+    echo "Error: download from MEGA failed."
+    exit 1
+fi
 
 if [[ -f "$FILENAME" ]]; then
     echo "Downloaded: $FILENAME"
