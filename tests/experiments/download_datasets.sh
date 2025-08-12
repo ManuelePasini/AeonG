@@ -2,14 +2,9 @@
 
 set -e
 
-LINK="https://mega.nz/file/qQ8UEQDS#_6kxPINFpLjO3W0PsNnHJ1pwHXk0EpfGV7pRuLbYbUE"
+LINK="https://mega.nz/file/HREw2QLS#EJcNBI4cjAXWLPXcV9IzBmQe61TmG5lZk_1Bt45DJuY"
 TARGET_FOLDER="/home/AeonG/tests/datasets/T-mgBench/"
 FILENAME="dataset_cypher.tar"
-
-yum update -y
-yum install -y wget tar
-
-wget https://mega.nz/linux/repo/CentOS_7/x86_64/megacmd-1.6.3-1.1.x86_64.rpm && yum install -y "$PWD/megacmd-1.6.3-1.1.x86_64.rpm"
 
 export PATH="$PWD:$PATH"
 export MEGACMD_USE_LEGACY_INTERFACE=1
