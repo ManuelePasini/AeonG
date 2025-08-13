@@ -23,6 +23,6 @@ if [[ -f "$FILENAME" ]]; then
     tar -xvf "$FILENAME"
     rm "$FILENAME"
 else
-    echo "Errore: il file $FILENAME non è stato scaricato correttamente!"
+    echo "Error: something went wrong while downloading $FILENAME!"
     exit 1
 fi

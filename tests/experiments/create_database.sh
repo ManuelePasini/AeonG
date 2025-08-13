@@ -6,6 +6,7 @@ client_binary="--client-binary ../../build/tests/mgbench/client"
 number_workers="--num-workers 1"
 output_path="/home/AeonG/tests/results/query_results/ingestion_stats"
 mgbench_download_dir="../datasets/T-mgBench"
+prefix_path="../results/"
 
 DATASET_SIZE="$1"
 ITERATIONS="$2"
