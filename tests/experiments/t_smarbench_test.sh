@@ -1,12 +1,12 @@
 #!/bin/bash
 
-SIZE=("large" "big")
+SIZE=("small" "large" "big")
 INGESTION_ITERATIONS=1
 QUERY_ITERATIONS=20
-WORKERS=(32 64)
+WORKERS=(1 2 4 8 10 16 20 32 64)
 
 echo "Downloading datasets"
-./download_datasets.sh "$size"
+./download_datasets.sh
 echo " ...done"
 
 for size in "${SIZE[@]}"; do
