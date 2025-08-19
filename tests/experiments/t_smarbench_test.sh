@@ -1,9 +1,9 @@
 #!/bin/bash
 
-SIZE=("small" "large" "big")
-INGESTION_ITERATIONS=1
-QUERY_ITERATIONS=20
-WORKERS=(1 2 4 8 10 16 20 32 64)
+IFS=',' read -r -a SIZE <<< "$DATASET_SIZE"
+INGESTION_ITERATIONS=$INGESTION_ITERATION
+QUERY_ITERATIONS=$QUERY_ITERATION
+IFS=',' read -r -a WORKERS <<< "$NUM_WORKER"
 
 echo "Downloading datasets"
 ./download_datasets.sh
@@ -20,3 +20,9 @@ for size in "${SIZE[@]}"; do
         ./query_dataset.sh "$size" "$worker" $QUERY_ITERATIONS
     done
 done
+
+echo "All experiments completed successfully."
+
+echo "Post-processing results..."
+python3 post_process_results.py
+echo " ...done"
