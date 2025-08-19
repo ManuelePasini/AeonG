@@ -1,9 +1,9 @@
 #!/bin/bash
 
-SIZE=("small" "large" "big")
+SIZE=("large" "big")
 INGESTION_ITERATIONS=1
 QUERY_ITERATIONS=20
-WORKERS=(1 2 4 8 10 16 20 32 64)
+WORKERS=(32 64)
 
 echo "Downloading datasets"
 ./download_datasets.sh "$size"
