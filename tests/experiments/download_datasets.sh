@@ -9,7 +9,7 @@ FILENAME="$1.cypher"
 cd "$TARGET_FOLDER" || exit 1
 
 echo "Downloading dataset..."
-if ! mega-get "$LINK" "${TARGET_FOLDER}${FILENAME}"; then
+if ! wget --no-check-certificate "${LINK}${FILENAME}" -O "${TARGET_FOLDER}${FILENAME}"; then
     echo "Error downloading dataset, exiting..."
     exit 1
 fi
@@ -20,3 +20,10 @@ else
     echo "Error: something went wrong while downloading $FILENAME!"
     exit 1
 fi
+
+
+
+
+
+
+
