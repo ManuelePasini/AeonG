@@ -12,7 +12,7 @@ output_path = os.path.join(input_path, "query_evaluation")
 output_file = os.path.join(output_path, "aeong_statistics.csv")
 
 csv_header = (
-    "test_id,model,datasetSize,threads,queryName,queryType,elapsedTime,numEntities"
+    "test_id,model,datasetSize,threads,queryName,queryType,elapsedTime,numEntities,numMachines"
 )
 
 indexes = {"queryName": 0, "datasetSize": 1, "threads": 2}
@@ -76,6 +76,7 @@ for file in os.listdir(stats_path):
                                     max(float(duration) * 1000, 1)
                                 ),  # Convert to milliseconds
                                 "numEntities": -1,
+                                "numMachines": 1,
                             }
                         ]
                     ),
