@@ -5,11 +5,11 @@ INGESTION_ITERATIONS=$INGESTION_ITERATION
 QUERY_ITERATIONS=$QUERY_ITERATION
 IFS=',' read -r -a WORKERS <<< "$NUM_WORKER"
 
-echo "Downloading datasets"
-./download_datasets.sh
-echo " ...done"
-
 for size in "${SIZE[@]}"; do
+
+    echo "Downloading datasets $size..."
+    ./download_datasets.sh $size
+    echo " ...done"
 
     echo "Creating AeonG database with size: $size.."
     ./create_database.sh "$size" $INGESTION_ITERATIONS
