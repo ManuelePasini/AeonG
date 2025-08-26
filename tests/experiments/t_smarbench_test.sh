@@ -1,9 +1,7 @@
 #!/bin/bash
 
 IFS=',' read -r -a SIZE <<< "$DATASET_SIZE"
-INGESTION_ITERATIONS=$INGESTION_ITERATION
-QUERY_ITERATIONS=$QUERY_ITERATION
-IFS=',' read -r -a WORKERS <<< "$NUM_WORKER"
+IFS=',' read -r -a WORKERS <<< "$THREAD"
 
 for size in "${SIZE[@]}"; do
 
