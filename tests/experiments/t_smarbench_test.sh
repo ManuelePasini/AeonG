@@ -22,5 +22,5 @@ done
 echo "All experiments completed successfully."
 
 echo "Post-processing results..."
-python3 post_process_results.py
+python3 ./post_process_results.py
 echo " ...done"
