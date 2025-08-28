@@ -107,7 +107,6 @@ for file in os.listdir(ingestion_stats_path):
         duration = data.get("duration", 99999999)
         storage_consumption = data.get("storage_consumption",99999999)
 
-        "test_id,model,startTimestamp,endTimestamp,dataset,datasetSize,threads,elapsedTime,storage"
         ingestion_statisics_df_statistics_df = pd.concat(
             [
                 query_statistics_df,
