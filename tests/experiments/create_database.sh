@@ -30,21 +30,22 @@ for iteration in $(seq 1 "$ITERATIONS"); do
 
     output_json_file="${output_path}/ingestion_${DATASET_SIZE}_${iteration}.json"
 
-    graph_op_latency=$(echo "$output" | awk '{print $1}')
-    storage_consumption=$(echo "$output" | awk '{print $2}')
-    start_time=$(echo "$output" | awk '{print $3}')
-    end_time=$(echo "$output" | awk '{print $4}')
+    graph_op_latency=$(echo "$output" | awk '{print $2}')
+    storage_consumption=$(echo "$output" | awk '{print $4}')
+    start_time=$(echo "$output" | awk '{print $6}')
+    end_time=$(echo "$output" | awk '{print $8}')
 
-    echo "{
-    \"graph_op_latency\": \"$graph_op_latency\",
-    \"storage_consumption\": \"$storage_consumption\",
-    \"start_time\": \"$start_time\",
-    \"end_time\": \"$end_time\",
-    \"dataset_size\": \"$DATASET_SIZE\",
-    \"iteration\": \"$iteration\",
-    \"duration\": $(echo "$end_time - $start_time" | bc)
-    }" > "$output_json_file"
-
+    cat > "$output_json_file" <<EOF
+    {
+    "graph_op_latency": $graph_op_latency,
+    "storage_consumption": $storage_consumption,
+    "start_time": $start_time,
+    "end_time": $end_time,
+    "dataset_size": "$DATASET_SIZE",
+    "iteration": $iteration,
+    "duration": $(echo "$end_time - $start_time" | bc)
+    }
+EOF
     echo "graph_op_latency:$graph_op_latency"
     echo "storage_consumption:$storage_consumption"
     echo "start_time:$start_time"

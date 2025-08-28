@@ -6,7 +6,8 @@ import pandas as pd
 
 input_path = os.path.join(os.getcwd(), "..", "results", "query_results")
 
-stats_path = os.path.join(input_path, "query_stats")
+query_stats_path = os.path.join(input_path, "query_stats")
+ingestion_stats_path = os.path.join(input_path, "ingestion_stats")
 
 output_path = os.path.join(input_path, "query_evaluation")
 output_file = os.path.join(output_path, "aeong_statistics.csv")
@@ -49,12 +50,13 @@ os.makedirs(output_path, exist_ok=True)
 
 statistics_df = create_csv(output_file, csv_header)
 
-for file in os.listdir(stats_path):
+for file in os.listdir(query_stats_path):
 
     query_name = file.split("_")[indexes["queryName"]]
     dataset_size = file.split("_")[indexes["datasetSize"]].replace("sz", "")
     threads = file.split("_")[indexes["threads"]].replace("wrk", "")
-    with open(os.path.join(stats_path, file), "r", encoding="utf-8") as f:
+
+    with open(os.path.join(query_stats_path, file), "r", encoding="utf-8") as f:
         try:
             # prendo solo la prima riga non vuota
             first_line = ""
