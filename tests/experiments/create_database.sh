@@ -27,13 +27,14 @@ python_script="../scripts/create_temporal_database.py"
 for iteration in $(seq 1 "$ITERATIONS"); do
     echo "=============AeonG create database, iteration $iteration it cost time==========="
     output=$(python3 "$python_script" $aeong_binary $client_binary $number_workers $database_directory $original_dataset $index_path $graph_op_cypher_path)
+    values=$(echo "$output" | tail -n 1)
 
     output_json_file="${output_path}/ingestion_${DATASET_SIZE}_${iteration}.json"
 
-    graph_op_latency=$(echo "$output" | awk '{print $2}')
-    storage_consumption=$(echo "$output" | awk '{print $4}')
-    start_time=$(echo "$output" | awk '{print $6}')
-    end_time=$(echo "$output" | awk '{print $8}')
+    graph_op_latency=$(echo "$values" | awk '{print $1}')
+    storage_consumption=$(echo "$values" | awk '{print $2}')
+    start_time=$(echo "$values" | awk '{print $3}')
+    end_time=$(echo "$values" | awk '{print $4}')
 
     cat > "$output_json_file" <<EOF
     {
