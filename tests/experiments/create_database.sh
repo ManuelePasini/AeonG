@@ -11,10 +11,6 @@ prefix_path="../results/"
 DATASET_SIZE="$1"
 ITERATIONS="$2"
 
-# Delete old database and create a new one
-rm -rf $prefix_path/database/aeong
-mkdir -p $prefix_path/database/aeong
-
 mkdir -p "$output_path"
 
 database_directory="--data-directory $prefix_path/database/aeong"
@@ -25,6 +21,10 @@ graph_op_cypher_path="--graph-operation-cypher-path $graph_op_path/cypher.txt"
 python_script="../scripts/create_temporal_database.py"
 
 for iteration in $(seq 1 "$ITERATIONS"); do
+    # Delete old database and create a new one
+    rm -rf $prefix_path/database/aeong
+    mkdir -p $prefix_path/database/aeong
+
     echo "=============AeonG create database, iteration $iteration it cost time==========="
     output=$(python3 "$python_script" $aeong_binary $client_binary $number_workers $database_directory $original_dataset $index_path $graph_op_cypher_path)
     values=$(echo "$output" | tail -n 1)
