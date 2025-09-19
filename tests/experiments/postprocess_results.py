@@ -82,7 +82,7 @@ for file in os.listdir(query_stats_path):
                             [
                                 {
                                     "test_id": str(myUUID),
-                                    "model": "aeong",
+                                    "model": "AeonG",
                                     "datasetSize": dataset_size,
                                     "threads": threads,
                                     "queryName": query_name,
@@ -117,7 +117,7 @@ for file in os.listdir(ingestion_stats_path):
                     [
                         {
                             "test_id": str(myUUID),
-                            "model": "aeong",
+                            "model": "AeonG",
                             "startTimestamp": data.get("start_time", ""),
                             "endTimestamp": data.get("end_time", ""),
                             "dataset": "smartbench",
