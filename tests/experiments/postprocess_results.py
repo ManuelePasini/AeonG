@@ -4,15 +4,21 @@ import json
 import pandas as pd
 
 
-input_path = os.path.join(os.getcwd(), "..", "results", "query_results")
+results_path = os.path.join(os.getcwd(), "..", "results", "aeong")
+
+input_path = os.path.join(os.getcwd(), results_path, "query_results")
 
 query_stats_path = os.path.join(input_path, "query_stats")
 ingestion_stats_path = os.path.join(input_path, "ingestion_stats")
 
-output_path = os.path.join(input_path, "query_evaluation")
+ingestion_output_path = os.path.join(results_path, "ingestion_time")
+query_output_path = os.path.join(results_path, "query_evaluation")
 
-query_statistics_output_file = os.path.join(output_path, "aeong_statistics.csv")
-ingestion_statistics_output_file = os.path.join(output_path, "aeong_ingestion_statistics.csv")
+os.makedirs(ingestion_output_path, exist_ok=True)
+os.makedirs(query_output_path, exist_ok=True)
+
+ingestion_statistics_output_file = os.path.join(ingestion_output_path, "ingestion_statistics.csv")
+query_statistics_output_file = os.path.join(query_output_path, "statistics.csv")
 
 query_csv_header = (
     "test_id,model,datasetSize,threads,queryName,queryType,elapsedTime,numEntities,numMachines"
@@ -47,9 +53,6 @@ def create_csv(filename, header):
 
 
 myUUID = uuid.uuid4()
-
-# Create output directory if it doesn't exist
-os.makedirs(output_path, exist_ok=True)
 
 query_statistics_df = create_csv(query_statistics_output_file, query_csv_header)
 ingestion_statisics_df = create_csv(ingestion_statistics_output_file, ingestion_csv_header)

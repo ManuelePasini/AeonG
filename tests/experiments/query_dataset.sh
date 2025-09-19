@@ -7,7 +7,7 @@ database_directory="--data-directory $prefix_path/database/aeong"
 index_path="--index-cypher-path ../datasets/T-mgBench/cypher_index.cypher"
 
 python_script="../scripts/evaluate_temporal_q.py"
-output_path="../results/query_results/query_stats"
+output_path="../results/aeong/query_results/query_stats"
 query_names=("EnvironmentCoverage" "EnvironmentAggregate" "MaintenanceOwners" "EnvironmentOutlier" "AgentOutlier" "AgentHistory")
 
 
