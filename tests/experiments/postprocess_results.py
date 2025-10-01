@@ -23,7 +23,7 @@ query_statistics_output_file = os.path.join(query_output_path, "statistics.csv")
 query_csv_header = (
     "test_id,model,datasetSize,threads,queryName,queryType,elapsedTime,numEntities,numMachines"
 )
-ingestion_csv_header = ("test_id,model,startTimestamp,endTimestamp,dataset,datasetSize,threads,elapsedTime,storage")
+ingestion_csv_header = ("test_id,model,startTimestamp,endTimestamp,dataset,datasetSize,threads,graphElapsedTime,tsElapsedTime,elapsedTime,numMachines,storage")
 
 indexes = {"queryName": 0, "datasetSize": 1, "threads": 2}
 
@@ -113,7 +113,6 @@ for file in os.listdir(ingestion_stats_path):
         data = load_first_json(os.path.join(ingestion_stats_path, file))
         duration = data.get("duration", 99999999)
         storage_consumption = data.get("storage_consumption",99999999)
-
         ingestion_statisics_df = pd.concat(
             [
                 ingestion_statisics_df,
@@ -127,7 +126,10 @@ for file in os.listdir(ingestion_stats_path):
                             "dataset": "smartbench",
                             "datasetSize": dataset_size,
                             "threads": 1,
+                            "graphElapsedTime": int(max(float(duration) * 1000, 1)),
+                            "tsElapsedTime": 0,
                             "elapsedTime": int(max(float(duration) * 1000, 1)),
+                            "numMachines": 1,
                             "storage": storage_consumption
                         }
                     ]
