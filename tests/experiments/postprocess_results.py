@@ -100,6 +100,10 @@ for file in os.listdir(query_stats_path):
             print(f"Skipping file {file} due to JSON decode error: {e}")
             continue
 
+# Save the updated DataFrame to CSV
+query_statistics_df.to_csv(query_statistics_output_file, index=False)
+
+
 for file in os.listdir(ingestion_stats_path):
     if file.endswith(".json"):
         dataset_size = file.split("_")[indexes["datasetSize"]]
@@ -112,7 +116,7 @@ for file in os.listdir(ingestion_stats_path):
 
         ingestion_statisics_df_statistics_df = pd.concat(
             [
-                query_statistics_df,
+                ingestion_statisics_df_statistics_df,
                 pd.DataFrame(
                     [
                         {
