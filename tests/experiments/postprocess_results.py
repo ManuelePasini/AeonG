@@ -114,9 +114,9 @@ for file in os.listdir(ingestion_stats_path):
         duration = data.get("duration", 99999999)
         storage_consumption = data.get("storage_consumption",99999999)
 
-        ingestion_statisics_df_statistics_df = pd.concat(
+        ingestion_statisics_df = pd.concat(
             [
-                ingestion_statisics_df_statistics_df,
+                ingestion_statisics_df,
                 pd.DataFrame(
                     [
                         {
@@ -137,4 +137,4 @@ for file in os.listdir(ingestion_stats_path):
         )
 
 # Save the updated DataFrame to CSV
-ingestion_statisics_df_statistics_df.to_csv(ingestion_statistics_output_file, index=False)
+ingestion_statisics_df.to_csv(ingestion_statistics_output_file, index=False)
