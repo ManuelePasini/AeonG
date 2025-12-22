@@ -50,6 +50,12 @@ if __name__ == "__main__":
                         default=helpers.get_binary_path("../tests/results/temporal_query/cypher_Q1.txt"),
                         help="directory path where temporal data should "
                              "be stored")
+    parser.add_argument("--selectivity",
+                    default="equal",
+                    help="Query selectivity type")
+    parser.add_argument("--time-range-id",
+                    default="0",
+                    help="Query time range id")
     parser.add_argument("--no-properties-on-edges",
                         action="store_true",
                         help="disable properties on edges")

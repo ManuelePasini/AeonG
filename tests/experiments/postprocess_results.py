@@ -21,11 +21,11 @@ ingestion_statistics_output_file = os.path.join(ingestion_output_path, "ingestio
 query_statistics_output_file = os.path.join(query_output_path, "statistics.csv")
 
 query_csv_header = (
-    "test_id,model,datasetSize,threads,queryName,queryType,elapsedTime,numEntities,numMachines"
+    "test_id,model,datasetSize,threads,queryName,queryType,elapsedTime,numEntities,numMachines,querySelectivity,temporalRangeIndex,iteration"
 )
 ingestion_csv_header = ("test_id,model,startTimestamp,endTimestamp,dataset,datasetSize,threads,graphElapsedTime,tsElapsedTime,elapsedTime,numMachines,storage")
 
-indexes = {"queryName": 0, "datasetSize": 1, "threads": 2}
+indexes = {"queryName": 0, "datasetSize": 1, "threads": 2, "iteration": 3, "selectivity":4, "timerange":5}
 
 
 def load_first_json(path):
@@ -62,7 +62,9 @@ for file in os.listdir(query_stats_path):
     query_name = file.split("_")[indexes["queryName"]]
     dataset_size = file.split("_")[indexes["datasetSize"]].replace("sz", "")
     threads = file.split("_")[indexes["threads"]].replace("wrk", "")
-
+    selectivity = file.split("_")[indexes["selectivity"]].replace("sel","")
+    iteration = file.split("_")[indexes["iteration"]].replace("it","")
+    time_range = file.split("_")[indexes["timerange"]].replace("tr","")
     with open(os.path.join(query_stats_path, file), "r", encoding="utf-8") as f:
         try:
             # prendo solo la prima riga non vuota
@@ -90,6 +92,9 @@ for file in os.listdir(query_stats_path):
                                     "elapsedTime": int(max(float(duration) * 1000, 1)),
                                     "numEntities": -1,
                                     "numMachines": 1,
+                                    "querySelectivity": selectivity,
+                                    "temporalRangeIndex": time_range,
+                                    "iteration": iteration
                                 }
                             ]
                         ),
