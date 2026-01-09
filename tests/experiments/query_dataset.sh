@@ -10,7 +10,7 @@ index_path="--index-cypher-path ../datasets/T-mgBench/cypher_index.cypher"
 python_script="../scripts/evaluate_temporal_q.py"
 
 output_path="../results/aeong/query_results/query_stats"
-query_names=("EnvironmentCoverage" "EnvironmentAggregate" "MaintenanceOwners" "EnvironmentOutlier" "AgentOutlier" "AgentHistory")
+query_names=("EnvironmentCoverage" "EnvironmentAggregate" "MaintenanceOwners" "EnvironmentAlert" "AgentOutlier" "AgentHistory")
 
 # Create output directory if it does not exist
 mkdir -p "$output_path"
@@ -26,14 +26,14 @@ worker="$2"
 ITERATIONS="$3"
 SELECTIVITY="$4"
 CONFIG_FILE="time_constraints.yaml"
-temporal_query_path="${prefix_path}temporal_query/${size}"
+temporal_query_path="${prefix_path}temporal_query/"
 
 # Ensure temporal query directory exists
 mkdir -p "$temporal_query_path"
 
-# --- Update queries with the appropriate timestamp range for the dataset size ---
-echo "Updating queries timespan filter for size: $size"
-./update_queries.sh "$size" "$temporal_query_path/"
+# # --- Update queries with the appropriate timestamp range for the dataset size ---
+# echo "Updating queries timespan filter for size: $size"
+# ./update_queries.sh "$size" "$temporal_query_path/"
 
 number_workers="--num-workers $worker"
 
@@ -48,14 +48,14 @@ for iteration in $(seq 1 "$ITERATIONS"); do
         query="${query_names[$i]}"
 
         # Retrieve temporal ranges for the current query
-        ranges=$(./get_temporal_ranges "$CONFIG_FILE" "$SELECTIVITY" "$query" "$size")
+        ranges=$(./get_temporal_ranges.sh "$temporal_query_path/$CONFIG_FILE" "$SELECTIVITY" "$query" "$size")
         
         # Loop over each temporal range
         while read -r idx from to; do
             echo "AeonG $query mix (range $idx)"
 
             # Rewrite the query file with the current temporal range
-            ./apply_timestamp.sh "$query" "$from" "$to" "$temporal_query_path"
+            ./replace_timestamp.sh "$query" "$query" "$to" "$temporal_query_path"
 
             temporal_query="--temporal-query-cypher-path $temporal_query_path/${query}.txt"
 

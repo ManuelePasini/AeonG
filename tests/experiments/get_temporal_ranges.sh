@@ -14,7 +14,12 @@ SIZE="$4"
 python3 - <<EOF
 import sys, yaml
 
-with open("$CONFIG_FILE") as f:
+CONSTRAINT = "${CONSTRAINT}"
+QUERY = "${QUERY}"
+SIZE = "${SIZE}"
+CONFIG_FILE = "${CONFIG_FILE}"
+
+with open(CONFIG_FILE) as f:
     data = yaml.safe_load(f)
 
 try:
