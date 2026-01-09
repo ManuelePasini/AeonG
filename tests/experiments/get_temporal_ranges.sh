@@ -28,5 +28,5 @@ except KeyError:
     sys.exit(f"No data found for {CONSTRAINT} -> {QUERY} -> {SIZE}")
 
 for k, v in dataset.items():
-    print(f"{k} {v[0]} {v[1]}")
+    print(f"{k} {v}")
 EOF

@@ -51,11 +51,11 @@ for iteration in $(seq 1 "$ITERATIONS"); do
         ranges=$(./get_temporal_ranges.sh "$temporal_query_path/$CONFIG_FILE" "$SELECTIVITY" "$query" "$size")
         
         # Loop over each temporal range
-        while read -r idx from to; do
+        while read -r idx to; do
             echo "AeonG $query mix (range $idx)"
 
             # Rewrite the query file with the current temporal range
-            ./replace_timestamp.sh "$query" "$query" "$to" "$temporal_query_path"
+            ./replace_timestamp.sh "$query" "$to" "$temporal_query_path"
 
             temporal_query="--temporal-query-cypher-path $temporal_query_path/${query}.txt"
 
