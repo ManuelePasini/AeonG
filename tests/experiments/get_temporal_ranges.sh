@@ -22,11 +22,11 @@ CONFIG_FILE = "${CONFIG_FILE}"
 with open(CONFIG_FILE) as f:
     data = yaml.safe_load(f)
 
-try:
-    dataset = data["temporalConstraints"][CONSTRAINT][QUERY][SIZE]
-except KeyError:
-    sys.exit(f"No data found for {CONSTRAINT} -> {QUERY} -> {SIZE}")
+    try:
+        dataset = data["temporalConstraints"][CONSTRAINT][QUERY][SIZE]
+    except KeyError:
+        sys.exit(f"No data found for {CONSTRAINT} -> {QUERY} -> {SIZE}")
 
-for k, v in dataset.items():
-    print(f"{k} {v}")
+    for k, v in dataset.items():
+        print(f"{k} {v[1]}")
 EOF

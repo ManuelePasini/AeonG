@@ -48,7 +48,7 @@ for iteration in $(seq 1 "$ITERATIONS"); do
         query="${query_names[$i]}"
 
         # Retrieve temporal ranges for the current query
-        ranges=$(./get_temporal_ranges.sh "$temporal_query_path/$CONFIG_FILE" "$SELECTIVITY" "$query" "$size")
+        ranges=$(./get_temporal_ranges.sh "$$CONFIG_FILE" "$SELECTIVITY" "$query" "$size")
         
         # Loop over each temporal range
         while read -r idx to; do
@@ -57,7 +57,7 @@ for iteration in $(seq 1 "$ITERATIONS"); do
             # Rewrite the query file with the current temporal range
             ./replace_timestamp.sh "$query" "$to" "$temporal_query_path"
 
-            temporal_query="--temporal-query-cypher-path $temporal_query_path/${query}.txt"
+            temporal_query="--temporal-query-cypher-path $temporal_query_path/$size/${query}.txt"
 
             # Construct a unique output filename including query, size, worker, iteration, selectivity, and range
             output_file="$output_path/${query}_sz${size}_wrk${worker}_it${iteration}_sel${SELECTIVITY}_tr${idx}.json"

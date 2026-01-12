@@ -17,12 +17,11 @@ case "$QUERY_NAME" in
   "EnvironmentOutlier")   QUERY_KEY="q4" ;;
   *)
     echo "Unknown query name: $QUERY_NAME"
-    exit 1
     ;;
 esac
 
-INPUT_FILE="${QUERY_PATH}/${QUERY_KEY}.txt"
-OUTPUT_FILE="${QUERY_PATH}/${QUERY_NAME}.txt"
+INPUT_FILE="${QUERY_PATH}/$size/${QUERY_KEY}.txt"
+OUTPUT_FILE="${QUERY_PATH}/$size/${QUERY_NAME}.txt"
 
 if [[ ! -f "$INPUT_FILE" ]]; then
   echo "File $INPUT_FILE non trovato"
