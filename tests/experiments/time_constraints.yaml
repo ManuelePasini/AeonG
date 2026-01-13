@@ -28,7 +28,7 @@ temporalConstraints:
         big: 56322780
 
   increased:
-    environmentCoverage:
+    EnvironmentCoverage:
       small:
         0: [ 1510700400000, 1511564400000 ] # 15/11/17 - 25/11/17 - 2880
       large:
@@ -36,7 +36,7 @@ temporalConstraints:
       big:
         0: [ 1510700400000, 1511564400000 ]
 
-    environmentAggregate:
+    EnvironmentAggregate:
       small:
         0: [1510700400000, 1511564400000] # 15/11/17 - 25/11/17 - 2880
       large:
@@ -44,15 +44,15 @@ temporalConstraints:
       big:
         0: [1531087200000, 1536847200000] # 09/07/18 - 13/09/18  - 28800
 
-    maintenanceOwners:
+    MaintenanceOwners:
       small:
         0: [1510700400000, 1513000000000] # 15/11/17 - 11/12/17 - 7488
       large:
         0: [1510700400000, 1513708800000] # 15/11/17 - 16/12/17 - 14976
-      big:
+      big:d
         0: [1510700400000, 1525674800000] # 15/11/17 - 07/05/18 -  74880
 
-    environmentOutlier:
+    EnvironmentOutlier:
       small:
         0: [1510700400000, 1512000000000] # 15/11/17 - 30/11/17 - 4608
       large:
@@ -60,7 +60,7 @@ temporalConstraints:
       big: 
         0: [1510700400000, 1519916400000] # 15/11/17 - 01/03/18 - 46080
 
-    agentOutlier:
+    AgentOutlier:
       small:
         0: [1510095600000, 1513000000000] # 08/11/17 - 11/12/17 - 9504
       large:
@@ -68,7 +68,7 @@ temporalConstraints:
       big:
         0: [1510095600000, 1529157600000] # 08/11/17 - 16/06/18 - 95040
 
-    agentHistory:
+    AgentHistory:
       small:
         0: [ 1510095600000, 1516370586000 ] # 08/11/17 - 19/01/18 - 20736
       large:

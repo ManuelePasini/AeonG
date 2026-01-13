@@ -1,5 +1,4 @@
 #!/bin/bash
-set -euo pipefail
 
 # --- Binary paths and directories ---
 aeong_binary="--aeong-binary ../../build/memgraph"
@@ -10,7 +9,7 @@ index_path="--index-cypher-path ../datasets/T-mgBench/cypher_index.cypher"
 python_script="../scripts/evaluate_temporal_q.py"
 
 output_path="../results/aeong/query_results/query_stats"
-query_names=("EnvironmentCoverage" "EnvironmentAggregate" "MaintenanceOwners" "EnvironmentAlert" "AgentOutlier" "AgentHistory")
+query_names=("EnvironmentCoverage" "EnvironmentAggregate" "MaintenanceOwners" "EnvironmentOutlier" "AgentOutlier" "AgentHistory")
 
 # Create output directory if it does not exist
 mkdir -p "$output_path"
@@ -25,7 +24,7 @@ size="$1"
 worker="$2"
 ITERATIONS="$3"
 SELECTIVITY="$4"
-CONFIG_FILE="time_constraints.yaml"
+CONFIG_FILE="./time_constraints.yaml"
 temporal_query_path="${prefix_path}temporal_query/"
 
 # Ensure temporal query directory exists
@@ -48,7 +47,7 @@ for iteration in $(seq 1 "$ITERATIONS"); do
         query="${query_names[$i]}"
 
         # Retrieve temporal ranges for the current query
-        ranges=$(./get_temporal_ranges.sh "$$CONFIG_FILE" "$SELECTIVITY" "$query" "$size")
+        ranges=$(./get_temporal_ranges.sh "$CONFIG_FILE" "$SELECTIVITY" "$query" "$size")
         
         # Loop over each temporal range
         while read -r idx to; do
@@ -57,7 +56,7 @@ for iteration in $(seq 1 "$ITERATIONS"); do
             # Rewrite the query file with the current temporal range
             ./replace_timestamp.sh "$query" "$to" "$temporal_query_path"
 
-            temporal_query="--temporal-query-cypher-path $temporal_query_path/$size/${query}.txt"
+            temporal_query="--temporal-query-cypher-path $temporal_query_path/${query}.txt"
 
             # Construct a unique output filename including query, size, worker, iteration, selectivity, and range
             output_file="$output_path/${query}_sz${size}_wrk${worker}_it${iteration}_sel${SELECTIVITY}_tr${idx}.json"
