@@ -24,7 +24,6 @@ size="$1"
 worker="$2"
 ITERATIONS="$3"
 SELECTIVITY="$4"
-CONFIG_FILE="./time_constraints.yaml"
 temporal_query_path="${prefix_path}temporal_query/"
 
 # Ensure temporal query directory exists
@@ -47,7 +46,7 @@ for iteration in $(seq 1 "$ITERATIONS"); do
         temporal_query="--temporal-query-cypher-path $cat ./../results/temporal_query/${query}.txt" 
 
         # Construct a unique output filename including query, size, worker, iteration, selectivity, and range
-        output_file="$output_path/${query}_sz${size}_wrk${worker}_it${iteration}_sel${SELECTIVITY}_tr${idx}.json"
+        output_file="$output_path/${query}_sz${size}_wrk${worker}_it${iteration}_sel${SELECTIVITY}_tr${0}.json"
 
         # Execute the Python evaluation script
         python3 "$python_script" \
