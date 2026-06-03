@@ -11,9 +11,11 @@ TSTAMP_TO="$2"
 QUERY_PATH="$3"
 
 case "$QUERY_NAME" in
+  "EnvironmentCoverage") QUERY_KEY="EnvironmentCoverage" ;;
   "EnvironmentAggregate") QUERY_KEY="q2" ;;
   "MaintenanceOwners")    QUERY_KEY="q3" ;;
   "AgentOutlier")         QUERY_KEY="q5" ;;
+  "AgentHistory")         QUERY_KEY="AgentHistory" ;;
   "EnvironmentOutlier")   QUERY_KEY="q4" ;;
   *)
     echo "Unknown query name: $QUERY_NAME"

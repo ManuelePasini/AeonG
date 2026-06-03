@@ -15,7 +15,11 @@ for size in "${SIZE[@]}"; do
 
     for worker in "${WORKERS[@]}"; do
         echo "Running query experiments for size: $size with $worker workers"
-        ./query_dataset.sh "$size" "$worker" $QUERY_ITERATIONS $QUERY_SELECTIVITY
+        if [[ "$DATASET" == "mimic" ]]; then
+            ./query_mimic.sh "$size" "$worker" $QUERY_ITERATIONS $QUERY_SELECTIVITY
+        else
+            ./query_dataset.sh "$size" "$worker" $QUERY_ITERATIONS $QUERY_SELECTIVITY
+        fi
     done
 done
 

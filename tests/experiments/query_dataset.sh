@@ -56,7 +56,7 @@ for iteration in $(seq 1 "$ITERATIONS"); do
             # Rewrite the query file with the current temporal range
             ./replace_timestamp.sh "$query" "$to" "$temporal_query_path"
 
-            temporal_query="--temporal-query-cypher-path $cat ./${query}.txt"
+            temporal_query="--temporal-query-cypher-path $cat ./../results/temporal_query/${query}.txt" 
 
             # Construct a unique output filename including query, size, worker, iteration, selectivity, and range
             output_file="$output_path/${query}_sz${size}_wrk${worker}_it${iteration}_sel${SELECTIVITY}_tr${idx}.json"

@@ -24,7 +24,6 @@ query_csv_header = (
     "test_id,model,datasetSize,threads,queryName,queryType,elapsedTime,numEntities,numMachines,querySelectivity,temporalRangeIndex,iteration"
 )
 ingestion_csv_header = ("test_id,model,startTimestamp,endTimestamp,dataset,datasetSize,threads,graphElapsedTime,tsElapsedTime,elapsedTime,numMachines,storage")
-
 indexes = {"queryName": 0, "datasetSize": 1, "threads": 2, "iteration": 3, "selectivity":4, "timerange":5}
 
 
@@ -51,7 +50,6 @@ def create_csv(filename, header):
         print("Created new statistics file...")
     return df
 
-
 myUUID = uuid.uuid4()
 
 query_statistics_df = create_csv(query_statistics_output_file, query_csv_header)
@@ -65,6 +63,7 @@ for file in os.listdir(query_stats_path):
     selectivity = file.split("_")[indexes["selectivity"]].replace("sel","")
     iteration = file.split("_")[indexes["iteration"]].replace("it","")
     time_range = file.split("_")[indexes["timerange"]].replace("tr","")
+    
     with open(os.path.join(query_stats_path, file), "r", encoding="utf-8") as f:
         try:
             # prendo solo la prima riga non vuota

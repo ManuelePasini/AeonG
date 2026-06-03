@@ -2,15 +2,15 @@
 
 set -e
 
-LINK="https://big.csr.unibo.it/downloads/stgraph/aeong/"
-INTERNAL_LINK="https://137.204.74.24/downloads/stgraph/aeong/"
-TARGET_FOLDER="/home/AeonG/tests/datasets/T-mgBench/"
+LINK="https://big.csr.unibo.it/downloads/stgraph/$DATASET/aeong/"
+INTERNAL_LINK="137.204.74.24/downloads/stgraph/$DATASET/aeong/"
+TARGET_FOLDER="/home/AeonG/tests/datasets/T-mgBench/$DATASET"
 FILENAME="$1.cypher"
 
+mkdir -p "$TARGET_FOLDER"
 cd "$TARGET_FOLDER" || exit 1
 
 echo "Downloading dataset ..."
-# curl -L -o "./${DATASET_SIZE}.tar" "${LINK}${DATASET_SIZE}.tar"
 if ! wget --no-check-certificate --tries=3 "${LINK}${FILENAME}"; then
     echo "Primary link failed, trying backup..."
     wget --no-check-certificate --tries=3 "${INTERNAL_LINK}${FILENAME}" || {
